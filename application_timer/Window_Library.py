@@ -1,10 +1,11 @@
 import pygetwindow as gw
 import time
 from datetime import datetime
+import pickle
+import pandas as pd
 
-# Dictionary to keep track of focused windows and their active time
-focus_times = {}
-
+# Create an empty DataFrame to store the data
+focus_times_df = pd.DataFrame(columns=['Window', 'Duration'])
 
 def get_active_window():
     try:
@@ -15,30 +16,59 @@ def get_active_window():
         print(f"Error getting active window: {e}")
     return None
 
+def save_data():
+    with open('focus_timer.pkl', 'wb') as f:
+        pickle.dump(focus_times_df, f)
+
+def load_data():
+    try:
+        with open('focus_timer.pkl','rb') as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return pd.DataFrame(columns=['Window', 'Duration'])
 
 def main():
+    global focus_times_df
+    focus_times_df = load_data()
+
     previous_window = None
     start_time = None
 
-    while True:
-        current_window = get_active_window()
+    try:
+        while True:
+            current_window = get_active_window()
+            
+            if current_window!= previous_window: 
+                end_time = datetime.now()
+                
+                if previous_window:
+                    duration = (end_time - start_time).total_seconds()
+                    new_row = pd.DataFrame({'Window': [previous_window], 'Duration': [duration]})
+                    focus_times_df = pd.concat([focus_times_df, new_row], ignore_index=True)
+                    print(f"Window '{previous_window}' was in focus for {duration:.2f} seconds.")
+                
+                previous_window = current_window 
+                start_time = end_time 
 
-        if current_window != previous_window:
-            end_time = datetime.now()
-
-            if previous_window:
-                duration = (end_time - start_time).total_seconds()
-                if previous_window in focus_times:
-                    focus_times[previous_window] += duration
+            elif current_window == previous_window:
+                # Check if the window is already in the DataFrame
+                if current_window in focus_times_df['Window'].values:
+                    # Update the duration for the current window
+                    focus_times_df.loc[focus_times_df['Window'] == current_window, 'Duration'] += 1
                 else:
-                    focus_times[previous_window] = duration
-                print(f"Window '{previous_window}' was in focus for {duration:.2f} seconds.")
+                    # Add a new row to the DataFrame with an initial duration of 1 second
+                    new_row = pd.DataFrame({'Window': [current_window], 'Duration': [1]})
+                    focus_times_df = pd.concat([focus_times_df, new_row], ignore_index=True)
 
-            previous_window = current_window
-            start_time = end_time
-
-        time.sleep(1)  # Check every second
-
+            time.sleep(1)  # Check every second
+            if time.time() % 600 == 0:
+                save_data()
+    except KeyboardInterrupt:
+        print("Exiting...")
+        save_data()  
+        # print the pkl file data
+        print(focus_times_df)
+        exit(0)
 
 if __name__ == "__main__":
     main()
