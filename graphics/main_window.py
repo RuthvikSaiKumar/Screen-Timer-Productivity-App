@@ -1,5 +1,6 @@
 import PySide6.QtCharts as QtCharts
-from PySide6.QtGui import QPainter, Qt, QIcon
+import PySide6.QtCore
+from PySide6.QtGui import QPainter, QIcon
 from PySide6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QWidget, QSizePolicy, QScrollArea, QTabWidget
 
 
@@ -12,6 +13,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(650, 600)
         icon = QIcon("assets/ReConnect Logo.png")
         self.setWindowIcon(icon)
+        # self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         ###############################################################################################
 
@@ -39,10 +41,14 @@ class MainWindow(QMainWindow):
 
         categories = ["Work", "Study", "Leisure", "Sleep"]
         minutes = [10, 20, 30, 40]
-        for category, minute in zip(categories, minutes):
+        for minute in minutes:
             self.bar.append(minute)
 
         self.bar_series = QtCharts.QHorizontalBarSeries()
+        self.bar_series.setLabelsVisible(True)
+        self.bar_series.setLabelsFormat("@value min(s)")
+
+        self.bar_series.setLabelsPosition(QtCharts.QAbstractBarSeries.LabelsPosition.LabelsOutsideEnd)
         self.bar_series.append(self.bar)
 
         self.bar_chart = QtCharts.QChart()
@@ -55,10 +61,12 @@ class MainWindow(QMainWindow):
         self.axis_x = QtCharts.QValueAxis()
         self.axis_x.setLabelFormat("%i")
         self.axis_x.setTitleText("Minutes")
+        self.axis_x.setGridLineVisible(False)
         self.bar_chart.setAxisX(self.axis_x, self.bar_series)
 
         self.axis_y = QtCharts.QBarCategoryAxis()
         self.axis_y.append(categories)
+        self.axis_y.setGridLineVisible(False)
         self.bar_chart.setAxisY(self.axis_y, self.bar_series)
 
         self.bar_chart_view = QtCharts.QChartView(self.bar_chart)
@@ -128,8 +136,18 @@ class MainWindow(QMainWindow):
         QTabWidget::pane {
             border: 0;
         }
+        QTabWidget::tab-bar {
+            left: 10px;
+        }
+        
         """)
+
+        tab_widget.addTab(QWidget(), QIcon("assets/ReConnect Logo.png"), "")
+        tab_widget.setTabEnabled(0, False)
+        tab_widget.setIconSize(PySide6.QtCore.QSize(40, 40))
         tab_widget.addTab(scroll_area, "Screen Time")
         tab_widget.addTab(scroll_area2, "Focus")
+        tab_widget.setCurrentIndex(1)
+        # todo: set tab 0 only to width 50px
 
         self.setCentralWidget(tab_widget)
