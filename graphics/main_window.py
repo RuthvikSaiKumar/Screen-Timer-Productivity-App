@@ -1,7 +1,8 @@
 import PySide6.QtCharts as QtCharts
 import PySide6.QtCore
-from PySide6.QtGui import QPainter, QIcon
-from PySide6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QWidget, QSizePolicy, QScrollArea, QTabWidget
+from PySide6.QtGui import QPainter, QIcon, QCursor
+from PySide6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QWidget, QSizePolicy, QScrollArea, QTabWidget, \
+    QToolTip
 
 
 class MainWindow(QMainWindow):
@@ -10,12 +11,15 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle("ReConnect - Productivity Tracker")
         self.setGeometry(200, 100, 600, 600)
-        self.setMinimumSize(650, 600)
+        self.setMinimumSize(750, 600)
         icon = QIcon("assets/ReConnect Logo.png")
         self.setWindowIcon(icon)
         # self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         ###############################################################################################
+
+        # todo: add labels to what chart is for what
+        # todo: remove the title bar and create custom action buttons (minimize, maximize, close)
 
         self.pie = QtCharts.QPieSeries()
         self.pie.append("Work", 10)
@@ -24,7 +28,7 @@ class MainWindow(QMainWindow):
         self.pie.append("Sleep", 40)
 
         self.pie.setLabelsVisible(True)
-        self.pie.setHoleSize(0.5)
+        # self.pie.setHoleSize(0.5)
 
         self.chart = QtCharts.QChart()
         self.chart.addSeries(self.pie)
@@ -37,60 +41,97 @@ class MainWindow(QMainWindow):
 
         ########################################
 
-        self.bar = QtCharts.QBarSet("Minutes")
+        self.daily_bar = QtCharts.QBarSet("Daily")
+        self.daily_bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index, self.daily_bar))
 
-        categories = ["Work", "Study", "Leisure", "Sleep"]
-        minutes = [10, 20, 30, 40]
-        for minute in minutes:
-            self.bar.append(minute)
+        daily_time = {
+            "App1": 6.4,
+            "App2": 4.5,
+            "App3": 7.5,
+            "App4": 2.5
+        }
 
-        self.bar_series = QtCharts.QHorizontalBarSeries()
-        self.bar_series.setLabelsVisible(True)
-        self.bar_series.setLabelsFormat("@value min(s)")
+        daily_time = dict(sorted(daily_time.items(), key=lambda item: item[1], reverse=False))
 
-        self.bar_series.setLabelsPosition(QtCharts.QAbstractBarSeries.LabelsPosition.LabelsOutsideEnd)
-        self.bar_series.append(self.bar)
+        for time in daily_time.values():
+            self.daily_bar.append(time)
 
-        self.bar_chart = QtCharts.QChart()
-        self.bar_chart.addSeries(self.bar_series)
-        self.bar_chart.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
-        self.bar_chart.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
-        self.bar_chart.setBackgroundRoundness(10)
-        self.bar_chart.legend().hide()
+        self.daily_bar_series = QtCharts.QHorizontalBarSeries()
+        self.daily_bar_series.append(self.daily_bar)
 
-        self.axis_x = QtCharts.QValueAxis()
-        self.axis_x.setLabelFormat("%i")
-        self.axis_x.setTitleText("Minutes")
-        self.axis_x.setGridLineVisible(False)
-        self.bar_chart.setAxisX(self.axis_x, self.bar_series)
+        self.daily_bar_chart = QtCharts.QChart()
+        self.daily_bar_chart.addSeries(self.daily_bar_series)
+        self.daily_bar_chart.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
+        self.daily_bar_chart.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
+        self.daily_bar_chart.setBackgroundRoundness(10)
+        self.daily_bar_chart.legend().hide()
 
-        self.axis_y = QtCharts.QBarCategoryAxis()
-        self.axis_y.append(categories)
-        self.axis_y.setGridLineVisible(False)
-        self.bar_chart.setAxisY(self.axis_y, self.bar_series)
+        self.daily_axis_x = QtCharts.QValueAxis()
+        self.daily_axis_x.setLabelFormat("%i")  # Display labels as integers
+        self.daily_axis_x.setTitleText("Time")
+        self.daily_axis_x.setTickType(QtCharts.QValueAxis.TickType.TicksDynamic)
+        self.daily_axis_x.setTickInterval(1)
+        self.daily_axis_x.setMinorTickCount(1)
+        self.daily_bar_chart.setAxisX(self.daily_axis_x, self.daily_bar_series)
 
-        self.bar_chart_view = QtCharts.QChartView(self.bar_chart)
-        self.bar_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+        self.daily_axis_y = QtCharts.QBarCategoryAxis()
+        self.daily_axis_y.append(list(daily_time.keys()))
+        self.daily_axis_y.setGridLineVisible(False)
+        self.daily_bar_chart.setAxisY(self.daily_axis_y, self.daily_bar_series)
+
+        self.daily_bar_chart_view = QtCharts.QChartView(self.daily_bar_chart)
+        self.daily_bar_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
 
         ############################################
 
-        self.button3 = QPushButton("Button 3")
+        self.weekly_bar = QtCharts.QBarSet("Weekly")
+        self.weekly_bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index, self.weekly_bar))
+
+        week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        weekly_hours = [1.5, 2.5, 3, 4.5, 5.5, 6.5, 6]
+        for time in weekly_hours:
+            self.weekly_bar.append(time)
+
+        self.weekly_bar_series = QtCharts.QBarSeries()
+        self.weekly_bar_series.append(self.weekly_bar)
+
+        self.weekly_bar_chart = QtCharts.QChart()
+        self.weekly_bar_chart.addSeries(self.weekly_bar_series)
+        self.weekly_bar_chart.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
+        self.weekly_bar_chart.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
+        self.weekly_bar_chart.setBackgroundRoundness(10)
+        self.weekly_bar_chart.legend().hide()
+
+        self.weekly_axis_x = QtCharts.QBarCategoryAxis()
+        self.weekly_axis_x.append(week)
+        self.weekly_axis_x.setGridLineVisible(False)
+        self.weekly_bar_chart.setAxisX(self.weekly_axis_x, self.weekly_bar_series)
+
+        self.weekly_axis_y = QtCharts.QValueAxis()
+        self.weekly_axis_y.setLabelFormat("%i h")
+        self.weekly_bar_chart.setAxisY(self.weekly_axis_y, self.weekly_bar_series)
+
+        self.weekly_bar_chart_view = QtCharts.QChartView(self.weekly_bar_chart)
+        self.weekly_bar_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        ############################################
+
         self.button4 = QPushButton("Button 4")
 
         self.chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.bar_chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.button3.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.daily_bar_chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.weekly_bar_chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.button4.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         self.chart_view.setMinimumSize(300, 300)
-        self.bar_chart_view.setMinimumSize(300, 300)
-        self.button3.setMinimumSize(300, 300)
+        self.daily_bar_chart_view.setMinimumSize(300, 300)
+        self.weekly_bar_chart_view.setMinimumSize(400, 300)
         self.button4.setMinimumSize(300, 300)
 
         self.grid = QGridLayout()
         self.grid.addWidget(self.chart_view, 0, 0)
-        self.grid.addWidget(self.bar_chart_view, 0, 1)
-        self.grid.addWidget(self.button3, 1, 0)
+        self.grid.addWidget(self.daily_bar_chart_view, 0, 1)
+        self.grid.addWidget(self.weekly_bar_chart_view, 1, 0)
         self.grid.addWidget(self.button4, 1, 1)
 
         central_widget = QWidget()
@@ -151,3 +192,17 @@ class MainWindow(QMainWindow):
         # todo: set tab 0 only to width 50px
 
         self.setCentralWidget(tab_widget)
+
+    @staticmethod
+    def handle_bar_hovered(status, index, bar_set):
+        if status:
+            value = bar_set.at(index)
+            hours = int(value)
+            minutes = int((value - hours) * 60)
+
+            if minutes == 0:
+                QToolTip.showText(QCursor.pos(), f"{hours} h")
+            else:
+                QToolTip.showText(QCursor.pos(), f"{hours} h {minutes} m")
+        else:
+            QToolTip.hideText()
