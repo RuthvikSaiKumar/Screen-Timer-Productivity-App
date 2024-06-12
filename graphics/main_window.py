@@ -1,3 +1,6 @@
+import random
+from pprint import pprint
+
 import PySide6.QtCharts as QtCharts
 import PySide6.QtCore
 from PySide6.QtGui import QPainter, QIcon, QCursor
@@ -20,6 +23,9 @@ class MainWindow(QMainWindow):
 
         # todo: add labels to what chart is for what
         # todo: remove the title bar and create custom action buttons (minimize, maximize, close)
+        # todo: add a button to switch between dark and light theme
+        # todo: add a left right arrow to switch between different weeks in the weekly bar chart
+        # todo: sort the weekly stack chart by value in descending order
 
         self.pie = QtCharts.QPieSeries()
         self.pie.append("Work", 10)
@@ -45,10 +51,10 @@ class MainWindow(QMainWindow):
         self.daily_bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index, self.daily_bar))
 
         daily_time = {
-            "App1": 6.4,
-            "App2": 4.5,
-            "App3": 7.5,
-            "App4": 2.5
+            "App1": random.randrange(1, 10) / 2,
+            "App2": random.randrange(1, 10) / 2,
+            "App3": random.randrange(1, 10) / 2,
+            "App4": random.randrange(1, 10) / 2
         }
 
         daily_time = dict(sorted(daily_time.items(), key=lambda item: item[1], reverse=False))
@@ -143,12 +149,102 @@ class MainWindow(QMainWindow):
 
         ###############################################################################################
 
-        self.button5 = QPushButton("Button 1")
-        self.button5.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self.button5.setMinimumSize(300, 300)
+        # self.button5 = QPushButton("Button 1")
+        # self.button5.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        # self.button5.setMinimumSize(300, 300)
+        # stacked bar chart
+
+        self.stacked_bar = QtCharts.QStackedBarSeries()
+        app1 = QtCharts.QBarSet("App1")
+        app2 = QtCharts.QBarSet("App2")
+        app3 = QtCharts.QBarSet("App3")
+        app4 = QtCharts.QBarSet("App4")
+
+        weekly_app_dict = {
+            "Sun": {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            },
+            "Mon": {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            },
+            "Tue": {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            },
+            "Wed": {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            },
+            "Thu": {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            },
+            "Fri": {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            },
+            "Sat": {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            }
+        }
+
+        # sort the app dict by value in descending order
+        # for week, app_dict in weekly_app_dict.items():
+        #     weekly_app_dict[week] = dict(sorted(app_dict.items(), key=lambda item: item[1], reverse=True))
+
+        for app_dict in weekly_app_dict.values():
+            for app, time in app_dict.items():
+                app.append(time)
+
+        for app_dict in weekly_app_dict.values():
+            for app, time in app_dict.items():
+                self.stacked_bar.append(app)
+
+        # self.stacked_bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index,
+        # self.stacked_bar))
+
+        self.stacked_bar_series = QtCharts.QChart()
+        self.stacked_bar_series.addSeries(self.stacked_bar)
+        self.stacked_bar_series.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
+        self.stacked_bar_series.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
+        self.stacked_bar_series.setBackgroundRoundness(10)
+        self.stacked_bar_series.legend().hide()
+
+        self.stacked_axis_x = QtCharts.QBarCategoryAxis()
+        self.stacked_axis_x.append(week)
+        self.stacked_axis_x.setGridLineVisible(False)
+        self.stacked_bar_series.setAxisX(self.stacked_axis_x, self.stacked_bar)
+
+        self.stacked_axis_y = QtCharts.QValueAxis()
+        self.stacked_axis_y.setLabelFormat("%i h")
+        self.stacked_bar_series.setAxisY(self.stacked_axis_y, self.stacked_bar)
+
+        self.stacked_bar_chart_view = QtCharts.QChartView(self.stacked_bar_series)
+        self.stacked_bar_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        self.stacked_bar_chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.stacked_bar_chart_view.setMinimumSize(300, 300)
 
         self.grid2 = QGridLayout()
-        self.grid2.addWidget(self.button5, 0, 0)
+        # self.grid2.addWidget(self.button5, 0, 0)
+        self.grid2.addWidget(self.stacked_bar_chart_view, 0, 0)
 
         central_widget2 = QWidget()
         central_widget2.setLayout(self.grid2)
