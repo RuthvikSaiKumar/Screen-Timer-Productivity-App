@@ -1,0 +1,57 @@
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+- Stack Bar Chart to show apps contribution to the total time spent on the weekly bar chart
+===========================================================================================
+
+        self.stacked_bar = QtCharts.QStackedBarSeries()
+        app1 = QtCharts.QBarSet("App1")
+        app2 = QtCharts.QBarSet("App2")
+        app3 = QtCharts.QBarSet("App3")
+        app4 = QtCharts.QBarSet("App4")
+
+        weekly_app_dict = {
+            weekday: {
+                app1: random.randint(1, 10),
+                app2: random.randint(1, 10),
+                app3: random.randint(1, 10),
+                app4: random.randint(1, 10)
+            } for weekday in week
+        }
+
+        # todo: sort the weekly stack chart by value in descending order
+        # for week, app_dict in weekly_app_dict.items():
+        #     weekly_app_dict[week] = dict(sorted(app_dict.items(), key=lambda item: item[1], reverse=True))
+
+        for app_dict in weekly_app_dict.values():
+            for app, time in app_dict.items():
+                app.append(time)
+
+        for app_dict in weekly_app_dict.values():
+            for app, time in app_dict.items():
+                self.stacked_bar.append(app)
+
+        # self.stacked_bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index,
+        # self.stacked_bar))
+
+        self.stacked_bar_series = QtCharts.QChart()
+        self.stacked_bar_series.addSeries(self.stacked_bar)
+        self.stacked_bar_series.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
+        self.stacked_bar_series.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
+        self.stacked_bar_series.setBackgroundRoundness(10)
+        self.stacked_bar_series.legend().hide()
+
+        self.stacked_axis_x = QtCharts.QBarCategoryAxis()
+        self.stacked_axis_x.append(week)
+        self.stacked_axis_x.setGridLineVisible(False)
+        self.stacked_bar_series.setAxisX(self.stacked_axis_x, self.stacked_bar)
+
+        self.stacked_axis_y = QtCharts.QValueAxis()
+        self.stacked_axis_y.setLabelFormat("%i h")
+        self.stacked_bar_series.setAxisY(self.stacked_axis_y, self.stacked_bar)
+
+        self.stacked_bar_chart_view = QtCharts.QChartView(self.stacked_bar_series)
+        self.stacked_bar_chart_view.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        self.stacked_bar_chart_view.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.stacked_bar_chart_view.setMinimumSize(300, 300)
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
