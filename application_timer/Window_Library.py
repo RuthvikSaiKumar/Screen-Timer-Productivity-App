@@ -1,3 +1,9 @@
+''' 
+This file is the sub-main file within the application_timer directory. 
+It communicates between all the other files within this directory.
+'''
+
+'''
 import pygetwindow as gw
 import time
 from datetime import datetime
@@ -72,3 +78,20 @@ def main():
 
 if __name__ == "__main__":
     main()
+'''
+
+import data_manager
+import data_model
+import window_utils
+
+class WindowLibrary:
+    def __init__(self, data_file):
+        self.data_manager = data_manager.DataManager(data_file)
+        self.data_model = data_model.DataModel(self.data_manager.load_data())
+        self.window_utils = window_utils.WindowUtils()
+
+    def get_data(self):
+        return self.data_model.get_data()
+
+    def process_window_events(self):
+        self.window_utils.process_events()
