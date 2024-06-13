@@ -17,6 +17,7 @@
             } for weekday in week
         }
 
+
         # todo: sort the weekly stack chart by value in descending order
         # for week, app_dict in weekly_app_dict.items():
         #     weekly_app_dict[week] = dict(sorted(app_dict.items(), key=lambda item: item[1], reverse=True))
