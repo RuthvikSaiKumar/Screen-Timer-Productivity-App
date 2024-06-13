@@ -8,7 +8,6 @@ window = graphics.MainWindow()
 window.show()
 app.exec()
 
-
 # from PySide6.QtWidgets import *
 # from PySide6.QtCore import Qt
 # from PySide6.QtGui import *
