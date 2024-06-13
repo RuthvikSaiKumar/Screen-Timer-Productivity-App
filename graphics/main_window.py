@@ -6,7 +6,7 @@ from PySide6.QtGui import QPainter, QIcon, QCursor
 from PySide6.QtWidgets import QMainWindow, QGridLayout, QWidget, QSizePolicy, QScrollArea, QTabWidget, \
     QToolTip, QLabel
 
-from graphics import Charts
+from graphics.charts import PieChart, HorizontalBarChart, WeeklyVerticalBarChart
 
 
 class MainWindow(QMainWindow):
@@ -24,8 +24,17 @@ class MainWindow(QMainWindow):
 
         # todo: add labels to what chart is for what
         # todo: add a button to switch between dark and light theme
+        # todo: add a ? button at bottom right corner to show help : Getting Started
 
-        self.pie_chart = Charts.PieChart()
+        pie_label = QLabel("Daily App Usage")
+        pie_label.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
+        pie_label.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 16px;
+            color: cyan;
+        """)
+
+        self.pie_chart = PieChart()
         self.pie_chart.add("App1", random.randrange(1, 10) / 2)
         self.pie_chart.add("App2", random.randrange(1, 10) / 2)
         self.pie_chart.add("App3", random.randrange(1, 10) / 2)
@@ -34,7 +43,15 @@ class MainWindow(QMainWindow):
 
         ########################################
 
-        self.daily_bar = Charts.HorizontalBarChart()
+        daily_bar_label = QLabel("Daily App Usage")
+        daily_bar_label.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
+        daily_bar_label.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 16px;
+            color: cyan;
+        """)
+
+        self.daily_bar = HorizontalBarChart()
         self.daily_bar.add("App1", random.randrange(1, 10) / 2)
         self.daily_bar.add("App2", random.randrange(1, 10) / 2)
         self.daily_bar.add("App3", random.randrange(1, 10) / 2)
@@ -43,7 +60,15 @@ class MainWindow(QMainWindow):
 
         ############################################
 
-        self.weekly_bar = Charts.WeeklyVerticalBarChart()
+        weekly_bar_label = QLabel("Weekly Screen Time")
+        weekly_bar_label.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
+        weekly_bar_label.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 16px;
+            color: cyan;
+        """)
+
+        self.weekly_bar = WeeklyVerticalBarChart()
         self.weekly_bar.add("Mon", random.randrange(1, 10))
         self.weekly_bar.add("Tue", random.randrange(1, 10))
         self.weekly_bar.add("Wed", random.randrange(1, 10))
@@ -55,9 +80,12 @@ class MainWindow(QMainWindow):
         ############################################
 
         self.grid = QGridLayout()
-        self.grid.addWidget(self.pie_chart.chart_view, 0, 0)
-        self.grid.addWidget(self.daily_bar.bar_chart_view, 0, 1)
-        self.grid.addWidget(self.weekly_bar.bar_chart_view, 1, 0, 1, 2)
+        self.grid.addWidget(pie_label, 0, 0)
+        self.grid.addWidget(daily_bar_label, 0, 1)
+        self.grid.addWidget(weekly_bar_label, 2, 0, 1, 2)
+        self.grid.addWidget(self.pie_chart.chart_view, 1, 0)
+        self.grid.addWidget(self.daily_bar.bar_chart_view, 1, 1)
+        self.grid.addWidget(self.weekly_bar.bar_chart_view, 3, 0, 1, 2)
 
         central_widget = QWidget()
         central_widget.setLayout(self.grid)
