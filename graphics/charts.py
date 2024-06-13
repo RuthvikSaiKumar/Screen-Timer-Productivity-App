@@ -16,7 +16,7 @@ class PieChart:
         self.chart.setAnimationOptions(QtCharts.QChart.AnimationOption.SeriesAnimations)
         self.chart.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
         self.chart.setBackgroundRoundness(10)
-        self.chart.setBackgroundBrush(PySide6.QtGui.QBrush(PySide6.QtGui.QColor(50, 50, 60, 255)))
+        self.chart.setBackgroundBrush(PySide6.QtGui.QBrush(PySide6.QtGui.QColor("#0D2818")))
 
         self.chart_view = QtCharts.QChartView(self.chart)
         self.chart_view.setRenderHint(PySide6.QtGui.QPainter.RenderHint.Antialiasing)
@@ -37,9 +37,6 @@ class PieChart:
 
             PySide6.QtWidgets.QToolTip.showText(PySide6.QtGui.QCursor.pos(), f"{category} : {value:.2f}%")
 
-        else:
-            PySide6.QtWidgets.QToolTip.hideText()
-
 
 class HorizontalBarChart:
     def __init__(self):
@@ -54,7 +51,7 @@ class HorizontalBarChart:
         self.bar_chart.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
         self.bar_chart.setBackgroundRoundness(10)
         self.bar_chart.legend().hide()
-        self.bar_chart.setBackgroundBrush(PySide6.QtGui.QBrush(PySide6.QtGui.QColor(50, 50, 60, 255)))
+        self.bar_chart.setBackgroundBrush(PySide6.QtGui.QBrush(PySide6.QtGui.QColor("#0D2818")))
 
         self.axis_x = QtCharts.QValueAxis()
         self.axis_x.setLabelFormat("%i h")
@@ -111,9 +108,6 @@ class HorizontalBarChart:
                 PySide6.QtWidgets.QToolTip.showText(PySide6.QtGui.QCursor.pos(),
                                                     f"{category} : {hours} h {minutes} m")
 
-        else:
-            PySide6.QtWidgets.QToolTip.hideText()
-
 
 # todo: add a left right arrow to switch between different weeks in the weekly bar chart
 class WeeklyVerticalBarChart:
@@ -135,7 +129,7 @@ class WeeklyVerticalBarChart:
         self.bar_chart.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
         self.bar_chart.setBackgroundRoundness(10)
         self.bar_chart.legend().hide()
-        self.bar_chart.setBackgroundBrush(PySide6.QtGui.QBrush(PySide6.QtGui.QColor(50, 50, 60, 255)))
+        self.bar_chart.setBackgroundBrush(PySide6.QtGui.QBrush(PySide6.QtGui.QColor("#0D2818")))
 
         self.axis_x = QtCharts.QBarCategoryAxis()
         self.axis_x.append(self.week)
@@ -187,6 +181,3 @@ class WeeklyVerticalBarChart:
                 PySide6.QtWidgets.QToolTip.showText(PySide6.QtGui.QCursor.pos(), f"{hours} h")
             else:
                 PySide6.QtWidgets.QToolTip.showText(PySide6.QtGui.QCursor.pos(), f"{hours} h {minutes} m")
-
-        else:
-            PySide6.QtWidgets.QToolTip.hideText()

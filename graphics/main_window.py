@@ -1,10 +1,9 @@
 import random
 
-import PySide6.QtCharts as QtCharts
 import PySide6.QtCore
-from PySide6.QtGui import QPainter, QIcon, QCursor
-from PySide6.QtWidgets import QMainWindow, QGridLayout, QWidget, QSizePolicy, QScrollArea, QTabWidget, \
-    QToolTip, QLabel
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QMainWindow, QGridLayout, QWidget, QScrollArea, QTabWidget, QLabel, QVBoxLayout, \
+    QHBoxLayout
 
 from graphics.charts import PieChart, HorizontalBarChart, WeeklyVerticalBarChart
 
@@ -18,6 +17,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(750, 600)
         icon = QIcon("assets/ReConnect Logo.png")
         self.setWindowIcon(icon)
+        self.setStyleSheet("""
+            background-color: #021002;
+        """)
         # self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
 
         ###############################################################################################
@@ -26,12 +28,40 @@ class MainWindow(QMainWindow):
         # todo: add a button to switch between dark and light theme
         # todo: add a ? button at bottom right corner to show help : Getting Started
 
+        # display an image
+        # tab_widget.addTab(QWidget(), QIcon("assets/ReConnect Logo.png"), "")
+        # tab_widget.setTabEnabled(0, False)
+        # tab_widget.setIconSize(PySide6.QtCore.QSize(40, 40))
+
+        image = QLabel()
+        image.setPixmap(PySide6.QtGui.QPixmap("assets/ReConnect Logo.png"))
+        image.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
+        # set image size
+        image.setScaledContents(True)
+        image.setMinimumSize(50, 50)
+        image.setMaximumSize(50, 50)
+
+        title = QLabel("ReConnect")
+        title.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignVCenter)
+        title.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 24px;
+            color: #16DB65;
+            font-weight: bold;
+        """)
+
+        self.hlayout = QHBoxLayout()
+        self.hlayout.addWidget(image)
+        self.hlayout.addWidget(title)
+
+        ###############################################################################################
+
         pie_label = QLabel("Daily App Usage")
         pie_label.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
         pie_label.setStyleSheet("""
             font-family: Century Gothic;
             font-size: 16px;
-            color: cyan;
+            color: #16DB65;
         """)
 
         self.pie_chart = PieChart()
@@ -48,9 +78,10 @@ class MainWindow(QMainWindow):
         daily_bar_label.setStyleSheet("""
             font-family: Century Gothic;
             font-size: 16px;
-            color: cyan;
+            color: #16DB65;
         """)
 
+        # todo: show only top 5 or 6 apps
         self.daily_bar = HorizontalBarChart()
         self.daily_bar.add("App1", random.randrange(1, 10) / 2)
         self.daily_bar.add("App2", random.randrange(1, 10) / 2)
@@ -65,7 +96,7 @@ class MainWindow(QMainWindow):
         weekly_bar_label.setStyleSheet("""
             font-family: Century Gothic;
             font-size: 16px;
-            color: cyan;
+            color: #16DB65;
         """)
 
         self.weekly_bar = WeeklyVerticalBarChart()
@@ -76,6 +107,12 @@ class MainWindow(QMainWindow):
         self.weekly_bar.add("Fri", random.randrange(1, 10))
         self.weekly_bar.add("Sat", random.randrange(1, 10))
         self.weekly_bar.add("Sun", random.randrange(1, 10))
+
+        ############################################
+
+        # todo: create a new widget to the current days screen app wise and also a sub widget for the tabs
+        # todo: if the app is a browser, show the website name instead of the app name
+        # todo: add a button to set a time limit for the app / tab
 
         ############################################
 
@@ -101,7 +138,7 @@ class MainWindow(QMainWindow):
         self.focus_label.setStyleSheet("""
             font-family: Century Gothic;
             font-size: 20px;
-            color: red;
+            color: #16DB65;
         """)
 
         self.grid2 = QGridLayout()
@@ -123,12 +160,12 @@ class MainWindow(QMainWindow):
             width: 120px; 
             border: 0; 
             font-family: Century Gothic;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: bold;
         }
         QTabBar::tab:selected { 
-            border-bottom: 2px solid red; 
-            color: red;
+            border-bottom: 2px solid #16DB65; 
+            color: #16DB65;
         }
         QTabWidget::pane {
             border: 0;
@@ -139,26 +176,16 @@ class MainWindow(QMainWindow):
         
         """)
 
-        tab_widget.addTab(QWidget(), QIcon("assets/ReConnect Logo.png"), "")
-        tab_widget.setTabEnabled(0, False)
-        tab_widget.setIconSize(PySide6.QtCore.QSize(40, 40))
         tab_widget.addTab(scroll_area, "Screen Time")
         tab_widget.addTab(scroll_area2, "Focus")
-        tab_widget.setCurrentIndex(1)
+        tab_widget.setCurrentIndex(0)
         # todo: set tab 0 only to width 50px
 
-        self.setCentralWidget(tab_widget)
+        self.vlayout = QVBoxLayout()
+        self.vlayout.addLayout(self.hlayout)
+        self.vlayout.addWidget(tab_widget)
 
-    @staticmethod
-    def handle_bar_hovered(status, index, bar_set):
-        if status:
-            value = bar_set.at(index)
-            hours = int(value)
-            minutes = int((value - hours) * 60)
-
-            if minutes == 0:
-                QToolTip.showText(QCursor.pos(), f"{hours} h")
-            else:
-                QToolTip.showText(QCursor.pos(), f"{hours} h {minutes} m")
-        else:
-            QToolTip.hideText()
+        # create a dummy widget to set the layout
+        self.dummy_widget = QWidget()
+        self.dummy_widget.setLayout(self.vlayout)
+        self.setCentralWidget(self.dummy_widget)
