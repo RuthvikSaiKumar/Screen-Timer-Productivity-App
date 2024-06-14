@@ -95,3 +95,5 @@ class WindowLibrary:
 
     def process_window_events(self):
         self.window_utils.process_events()
+
+WindowLibrary('focus_timer.pkl').process_window_events()
