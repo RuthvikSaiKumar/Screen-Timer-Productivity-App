@@ -109,7 +109,6 @@ class HorizontalBarChart:
                                                     f"{category} : {hours} h {minutes} m")
 
 
-# todo: add a left right arrow to switch between different weeks in the weekly bar chart
 class WeeklyVerticalBarChart:
     def __init__(self):
         self.bar = QtCharts.QBarSet("Weekly")
