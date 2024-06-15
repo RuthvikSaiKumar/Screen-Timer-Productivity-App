@@ -1,5 +1,3 @@
----
-
 # 📊 Screen-Timer-Productivity-App
 
 ## Welcome to ReConnect!
