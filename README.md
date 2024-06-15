@@ -1,5 +1,3 @@
-Sure! Here’s a more stylized and focused version of your text, incorporating minimal distractions and some emotes for a bit of visual interest:
-
 ---
 
 # 📊 Screen-Timer-Productivity-App
