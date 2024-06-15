@@ -3,7 +3,7 @@ import random
 import PySide6.QtCore
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import QMainWindow, QGridLayout, QWidget, QScrollArea, QTabWidget, QLabel, QVBoxLayout, \
-    QHBoxLayout, QPushButton
+    QHBoxLayout, QPushButton, QMessageBox
 
 from graphics.charts import PieChart, HorizontalBarChart, WeeklyVerticalBarChart
 
@@ -114,6 +114,7 @@ class MainWindow(QMainWindow):
         self.previous_week_button.setMinimumWidth(20)
         self.previous_week_button.setMaximumWidth(20)
         self.previous_week_button.setMinimumHeight(50)
+        self.previous_week_button.clicked.connect(lambda: print("Previous Week"))
 
         self.next_week_button = QPushButton(">")
         self.next_week_button.setStyleSheet("""
@@ -127,6 +128,7 @@ class MainWindow(QMainWindow):
         self.next_week_button.setMinimumWidth(20)
         self.next_week_button.setMaximumWidth(20)
         self.next_week_button.setMinimumHeight(50)
+        self.next_week_button.clicked.connect(lambda: print("Next Week"))
 
         self.week_layout = QHBoxLayout()
         self.week_layout.addWidget(self.previous_week_button)
@@ -183,8 +185,8 @@ class MainWindow(QMainWindow):
             """)
             app_set_app_limit.setMaximumSize(30, 30)
             app_set_app_limit.setMinimumSize(30, 30)
-            # load the icon
             app_set_app_limit.setIcon(QIcon("assets/timer.png"))
+            app_set_app_limit.clicked.connect(self.app_limit_button_clicked)
 
             app_layout = QHBoxLayout()
             app_layout.addWidget(app_name, 2)
@@ -283,3 +285,26 @@ class MainWindow(QMainWindow):
         self.dummy_widget = QWidget()
         self.dummy_widget.setLayout(self.vlayout)
         self.setCentralWidget(self.dummy_widget)
+
+    @staticmethod
+    def app_limit_button_clicked():
+        notification = QMessageBox()
+        # todo: refactor this text
+        notification.setWindowTitle("App Limit")
+        notification.setText(
+            "Feature Coming Soon\n\n"
+            "This button will set a time limit for the app and notify you when the time is crossed.")
+        notification.setIcon(QMessageBox.Icon.Information)
+        notification.setStandardButtons(QMessageBox.StandardButton.Ok)
+        notification.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 15px;
+            color: #16DB65;
+        """)
+        notification.setWindowIcon(QIcon("assets/ReConnect Logo.png"))
+        # set border of button to be green
+        notification.button(QMessageBox.StandardButton.Ok).setStyleSheet("""
+            background-color: #16DB65; 
+            color: #021002;
+        """)
+        notification.exec()

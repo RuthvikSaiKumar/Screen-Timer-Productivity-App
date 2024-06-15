@@ -1,7 +1,7 @@
 # 📊 Screen-Timer-Productivity-App
 
 ## Welcome to ReConnect!
-### Bringing Digital Wellbeing to Your PC (Windows)
+### Bringing Digital Well-being to Your PC (Windows)
 
 ---
 
