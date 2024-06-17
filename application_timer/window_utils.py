@@ -1,12 +1,14 @@
 '''
 This file monitors the active window and logs the amount of time spent on each window.
-Has the ability to check each tab within the browers. 
+Has the ability to check each tab within the browers.  And It saves this data to a session dictionary or a
+chache file
 '''
 import pygetwindow as gw
 import time
 from datetime import date
 import pickle
 import psutil
+import pandas as pd
 # from user_agents import parse
 
 # This class is supposed to give the main file, the data on current window. 
@@ -38,8 +40,7 @@ class WindowUtils():
             self.last_save_time = current_time
 
     def data_parse(self):
-        # Send the data to data_model.py for it to make a Dataframe. 
-        print()
+        return self.window_screentime
 
     def get_app_type(self, window):
         try:
@@ -55,33 +56,19 @@ class WindowUtils():
         return "application"
 
     def window_grab(self):
-        # This loop should run infinitely unless inturrepted via keyboard
+    # This loop should run infinitely unless inturrepted via keyboard
         while True:
-            # This try and except blocks help in detecting the focused windows and their times whilst 
-            # handling the exceptions of keyboard intruption 
+        # This try and except blocks help in detecting the focused windows and their times whilst 
+        # handling the exceptions of keyboard intruption 
             try:
                 window = gw.getActiveWindow()
-                if self.previous_window!=window:
+                if self.previous_window != window:
                     if self.previous_window is not None:
-                        # print(self.browser)
                         self.end_time = time.time()
                         window_time = self.end_time - self.start_time
                         h, m, s = int(window_time // 3600), int(window_time % 3600) // 60, int(window_time % 60)
                         print("Time spent on ", self.previous_window.title, " is: ", f"{h:02}:{m:02}:{s:02}")
                         window_time_hhmmss = time.strftime("%H:%M:%S", time.gmtime(window_time))
-                        # browser_found = False
-                        # This loop checks if the active window is a browser or an application
-                        # for i in self.browser_list:
-                        #     if not browser_found:
-                        #         for j in self.previous_window.title.split() :
-                        #             if i.lower() == j.lower():
-                        #                 app_type = "browser"
-                        #                 browser_found = True
-                        #                 break
-                        #         if browser_found:
-                        #             break
-                        # if not browser_found:
-                        #     app_type = "application"
                         app_type = self.get_app_type(self.previous_window)
                         self.window_screentime[self.previous_window.title] = {
                             "apptype": app_type,  # or "application"
@@ -91,20 +78,17 @@ class WindowUtils():
                                 "seconds": int(window_time_hhmmss.split(":")[2]),
                                 }
                         }
-                    elif (self.previous_window) is None or self.previous_window == ' ':
-                        pass
+                        self.save_data()
+
                     self.previous_window = window
                     self.start_time = time.time()
 
-                # self.window_time += 1
-                self.save_data()
                 time.sleep(1)
 
             except KeyboardInterrupt:
                 if self.previous_window is not None:
                     self.end_time = time.time()
                     window_time = self.end_time - self.start_time
-                    # print("Time spent on ", self.previous_window.title, " is: ", window_time)
                     h, m, s = int(window_time // 3600), int(window_time % 3600) // 60, int(window_time % 60)
                     print("Time spent on ", self.previous_window.title, " is: ", f"{h:02}:{m:02}:{s:02}")
                     window_time_hhmmss = time.strftime("%H:%M:%S", time.gmtime(window_time))
@@ -118,7 +102,21 @@ class WindowUtils():
                             }
                     }
                     print(self.window_screentime)
-                self.save_data(interrupt = True)
+                self.save_data(interrupt=True)
                 break
 
+
+
+class WindowsModel:
+    def __init__(self, data_dict):
+        self.data_dict = data_dict
+
+    def process_data(self):
+        df = pd.DataFrame(self.data_dict)
+        current_datetime = datetime.datetime.now()
+        file_name = f"window_screentime_{current_datetime.strtime('%Y-%m-%d_%H-%M-%S')}.pkl"
+        df.to_pickle(file_name)
+        print(f"Data saved to {file_name}")
+
 # TODO : Implement a way to avoid loss of data from certain applications due to the limits of pygetwindow
+# TODO : Make the code for data_traverse such that it reads the data from the cache completely and store it in a dict which is then shared to another file.
