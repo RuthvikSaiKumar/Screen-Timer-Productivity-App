@@ -6,6 +6,7 @@ import PySide6.QtWidgets
 # todo: make the pie chart to show the weekly app usage, not daily
 class PieChart:
     def __init__(self):
+        self.time = {}
         self.pie = QtCharts.QPieSeries()
         self.pie.setLabelsVisible(True)
         self.pie.hovered.connect(lambda status, slice: self.handle_pie_hovered(status, slice))
@@ -26,7 +27,12 @@ class PieChart:
         self.chart_view.setMinimumSize(300, 300)
 
     def add(self, name, value):
-        self.pie.append(name, value)
+        self.time[name] = value
+        self.time = dict(sorted(self.time.items(), key=lambda item: item[1], reverse=False))
+
+        self.pie.clear()
+        for app, time in self.time.items():
+            self.pie.append(app, time)
         self.chart.update()
 
     @staticmethod
@@ -55,7 +61,6 @@ class HorizontalBarChart:
 
         self.axis_x = QtCharts.QValueAxis()
         self.axis_x.setLabelFormat("%i h")
-        self.axis_x.setTitleText("Time")
         self.axis_x.setTickType(QtCharts.QValueAxis.TickType.TicksDynamic)
         self.axis_x.setTickInterval(1)
         self.axis_x.setMinorTickCount(1)
@@ -74,6 +79,7 @@ class HorizontalBarChart:
     def add(self, name, value):
 
         # todo: there must be a better way to add items instead of creating a new BarSet every time
+        # todo: app data not correlating with the pie chart
 
         self.time[name] = value
         self.time = dict(sorted(self.time.items(), key=lambda item: item[1], reverse=False))
@@ -114,7 +120,7 @@ class WeeklyVerticalBarChart:
         self.bar = QtCharts.QBarSet("Weekly")
         self.bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index, self.bar))
 
-        self.week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        self.week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
         self.hours = [0, 0, 0, 0, 0, 0, 0]
         for time in self.hours:
             self.bar.append(time)
