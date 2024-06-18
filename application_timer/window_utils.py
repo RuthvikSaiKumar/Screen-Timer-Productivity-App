@@ -54,6 +54,10 @@ class WindowUtils():
         except KeyboardInterrupt:
             pass
         return "application"
+    
+    def process_data(self):
+        model = WindowsModel(self.window_screentime)
+        model.process_data()
 
     def window_grab(self):
     # This loop should run infinitely unless inturrepted via keyboard

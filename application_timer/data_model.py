@@ -1,5 +1,5 @@
 '''
-This file makes a Dataframe of the user's screen time for one log in session.
+This file is practically useless
 '''
 
 # import pandas as pd
