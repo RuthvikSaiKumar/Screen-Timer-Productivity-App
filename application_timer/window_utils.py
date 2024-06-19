@@ -1,8 +1,10 @@
-'''
+"""
 This file monitors the active window and logs the amount of time spent on each window.
-Has the ability to check each tab within the browers.  And It saves this data to a session dictionary or a
-chache file
-'''
+Has the ability to check each tab within the browsers.  And It saves this data to a session dictionary or a
+cache file
+"""
+
+import contextlib
 import pygetwindow as gw
 import time
 from datetime import date
@@ -15,7 +17,7 @@ import pandas as pd
 # from user_agents import parse
 
 # This class is supposed to give the main file, the data on current window. 
-class WindowUtils():
+class WindowUtils:
 
     def __init__(self):
         self.previous_window = None
@@ -48,16 +50,12 @@ class WindowUtils():
         return self.window_screentime
 
     def get_app_type(self, window):
-        try:
+        with (contextlib.suppress(KeyboardInterrupt)):
             for process in psutil.process_iter(['pid', 'name']):
-                try:
-                    if process.info['name'].lower() in [i.lower() + '.exe' for i in self.browser_list]:
-                        if window.title in process.as_dict()['cmdline']:
-                            return "browser"
-                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                    pass
-        except KeyboardInterrupt:
-            pass
+                with contextlib.suppress(psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    if process.info['name'].lower() in [i.lower() + '.exe' for i in self.browser_list] and \
+                            window.title in process.as_dict()['cmdline']:
+                        return "browser"
         return "application"
 
     def process_data(self):
