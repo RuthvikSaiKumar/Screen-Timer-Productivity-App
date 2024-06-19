@@ -9,6 +9,18 @@ from PySide6.QtWidgets import QMainWindow, QGridLayout, QWidget, QScrollArea, QT
 from graphics.charts import PieChart, HorizontalBarChart, WeeklyVerticalBarChart
 
 
+def float_to_time(time: float):
+    hours = int(time)
+    minutes = int((time - hours) * 60)
+
+    if minutes == 0:
+        return f"{hours} hr"
+    elif hours == 0:
+        return f"{minutes} min"
+
+    return f"{hours} hr {minutes} min"
+
+
 @dataclasses.dataclass
 class WeekData:
     sunday: PySide6.QtCore.QDate = None
@@ -24,13 +36,111 @@ class WeekData:
         return f"{self.sunday.toString('dd MMM')} - {self.saturday.toString('dd MMM')}"
 
 
-@dataclasses.dataclass
-class AppData:
+class DataInterface:
     name: str
     time: float
+    data_type: str
+
+    def __init__(self, name, time):
+        self.name = name
+        self.time = time
 
     def __repr__(self):
         return f"{self.name} : {self.time}"
+
+
+class TabData(DataInterface):
+    data_type: str = "Tab"
+
+
+class AppData(DataInterface):
+    app_type: str = "App"
+    browser_tabs: list[TabData] = None
+    data_type = "Application"
+
+    def set_browser(self, bool_=True):
+        self.app_type = "Browser" if bool_ else "App"
+
+    def add_tab(self, tab: TabData):
+        if self.app_type != "Browser":
+            raise ValueError(f"The app {self.name} is not a browser.")
+
+        if self.browser_tabs is None:
+            self.browser_tabs = []
+
+        self.browser_tabs.append(tab)
+
+    def __repr__(self):
+        return f"{self.name} ({self.app_type}) : {self.time}"
+
+
+class AppItem:
+    def __init__(self, appdata: DataInterface):
+        self.app = QWidget()
+        self.app.setStyleSheet("""
+            background-color: #021002;
+            border-radius: 15px;
+        """)
+        self.app.setMinimumHeight(50)
+        self.app.setMaximumHeight(50)
+
+        # todo: make this dynamic to the width of the widget
+        self.app_name = QLabel(appdata.name if len(appdata.name) <= 15 else f"{appdata.name[:15]}...")
+        self.app_name.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.app_name.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 16px;
+            margin-left: 5px;
+        """)
+
+        self.app_time = QLabel(float_to_time(appdata.time))
+        self.app_time.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        self.app_time.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 16px;
+        """)
+
+        self.app_set_app_limit = QPushButton()
+        self.app_set_app_limit.setStyleSheet("""
+            background-color: #16DB65;
+            color: #021002;
+            border-radius: 10px;
+        """)
+        self.app_set_app_limit.setMaximumSize(30, 30)
+        self.app_set_app_limit.setMinimumSize(30, 30)
+        self.app_set_app_limit.setIcon(QIcon("assets/timer.png"))
+        self.app_set_app_limit.setToolTip("App time limit notifier")
+        self.app_set_app_limit.clicked.connect(self.app_limit_button_clicked)
+
+        self.app_layout = QHBoxLayout()
+        self.app_layout.addWidget(self.app_name, 2)
+        self.app_layout.addWidget(self.app_time, 1)
+        self.app_layout.addWidget(self.app_set_app_limit, 1)
+
+        self.app.setLayout(self.app_layout)
+
+    @staticmethod
+    def app_limit_button_clicked():
+        notification = QMessageBox()
+        # todo: rephrase this text
+        notification.setWindowTitle("App Limit")
+        notification.setText(
+            "Feature Coming Soon\n\n"
+            "This button will set a time limit for the app and notify you when the time is crossed.")
+        notification.setIcon(QMessageBox.Icon.Information)
+        notification.setStandardButtons(QMessageBox.StandardButton.Ok)
+        notification.setStyleSheet("""
+                font-family: Century Gothic;
+                font-size: 15px;
+                color: #16DB65;
+            """)
+        notification.setWindowIcon(QIcon("assets/ReConnect Logo.png"))
+        # set border of button to be green
+        notification.button(QMessageBox.StandardButton.Ok).setStyleSheet("""
+                background-color: #16DB65; 
+                color: #021002;
+            """)
+        notification.exec()
 
 
 class MainWindow(QMainWindow):
@@ -60,7 +170,16 @@ class MainWindow(QMainWindow):
 
         self.create_title_bar()
 
-        self.test_app_data = [AppData(f"App{i}", random.randrange(1, 10) / 2) for i in range(1, 6)]
+        # TEST DATA ##########################################################
+        self.test_app_data = [AppData(f"App{i}", random.randrange(1, 10) / 2) for i in range(random.randrange(0, 7))]
+        browser = AppData("Browser", random.randrange(1, 10) / 2)
+        browser.set_browser()
+        for i in range(random.randrange(0, 7)):
+            browser.add_tab(TabData(f"Tab{i}", random.randrange(1, 10) / 2))
+        if browser.browser_tabs is None:
+            browser.browser_tabs = []
+        self.test_app_data.append(browser)
+        ######################################################################
 
         self.create_pie_chart()
         self.create_daily_bar_chart()
@@ -177,7 +296,7 @@ class MainWindow(QMainWindow):
         self.hlayout.addWidget(title)
 
     def create_pie_chart(self):
-        self.pie_label = QLabel("Daily App Usage")
+        self.pie_label = QLabel("Daily App Usage %")
         self.pie_label.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
         self.pie_label.setStyleSheet("""
             font-family: Century Gothic;
@@ -198,9 +317,11 @@ class MainWindow(QMainWindow):
             color: #16DB65;
         """)
 
-        # todo: show only top 5 or 6 apps
         self.daily_bar = HorizontalBarChart()
-        for app in self.test_app_data:
+
+        app_time_sorted = sorted(self.test_app_data, key=lambda app_: app_.time, reverse=True)
+
+        for app in app_time_sorted[:5]:
             self.daily_bar.add(app.name, app.time)
 
     def create_weekly_bar_chart(self):
@@ -256,69 +377,55 @@ class MainWindow(QMainWindow):
         self.week_layout.setSpacing(0)
 
     def create_app_list(self):
-        # todo: create a subwidgets to show tabs for browser
+        # todo: create a button for browser to show or hide tabs
         # todo: add a button to set a time limit for the app / tab
+        # todo: the background should not scroll
 
         self.app_usage_list_label = QLabel("App Usage List")
         self.app_usage_list_label.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
         self.app_usage_list_label.setStyleSheet("""
-                    font-family: Century Gothic;
-                    font-size: 16px;
-                    color: #16DB65;
-                """)
-
-        # todo: somehow put this into a class
-
-        app_list = [QWidget() for _ in range(10)]
+            font-family: Century Gothic;
+            font-size: 16px;
+            color: #16DB65;
+        """)
 
         layout = QVBoxLayout()
-        for app in app_list:
-            app.setStyleSheet("""
-                                background-color: #021002;
-                            """)
-            app.setMinimumHeight(50)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-            # todo: set the text to the app name to be truncated if it is too long
-            app_name = QLabel("App Name")
-            app_name.setAlignment(Qt.AlignmentFlag.AlignVCenter)
-            app_name.setStyleSheet("""
-                        font-family: Century Gothic;
-                        font-size: 16px;
-                    """)
+        app_time_sorted = sorted(self.test_app_data, key=lambda app_: app_.time, reverse=True)
 
-            app_time = QLabel("2h 30m")
-            app_time.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            app_time.setStyleSheet("""
-                        font-family: Century Gothic;
-                        font-size: 16px;
-                    """)
+        for app in app_time_sorted:
+            item = AppItem(app)
+            if app.app_type == "Browser":
+                layout.addWidget(item.app)
+                tab_layout = QVBoxLayout()
+                tab_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-            app_set_app_limit = QPushButton()
-            app_set_app_limit.setStyleSheet("""
-                        background-color: #16DB65;
-                        color: #021002;
-                        font-family: Century Gothic;
-                        font-size: 16px;
-                        border-radius: 10px;
-                    """)
-            app_set_app_limit.setMaximumSize(30, 30)
-            app_set_app_limit.setMinimumSize(30, 30)
-            app_set_app_limit.setIcon(QIcon("assets/timer.png"))
-            app_set_app_limit.clicked.connect(self.app_limit_button_clicked)
+                tab_time_sorted = sorted(app.browser_tabs, key=lambda tab_: tab_.time, reverse=True)
 
-            app_layout = QHBoxLayout()
-            app_layout.addWidget(app_name, 2)
-            app_layout.addWidget(app_time, 1)
-            app_layout.addWidget(app_set_app_limit, 1)
+                for tab in tab_time_sorted:
+                    item = AppItem(tab)
 
-            app.setLayout(app_layout)
-            layout.addWidget(app)
+                    image = QLabel()
+                    image.setPixmap(PySide6.QtGui.QPixmap("assets/tab_sublist.png"))
+                    image.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
+                    image.setScaledContents(True)
+                    image.setMinimumSize(25, 25)
+                    image.setMaximumSize(25, 25)
+
+                    tab_h_layout = QHBoxLayout()
+                    tab_h_layout.addWidget(image)
+                    tab_h_layout.addWidget(item.app)
+                    tab_layout.addLayout(tab_h_layout)
+                layout.addLayout(tab_layout)
+            else:
+                layout.addWidget(item.app)
 
         area = QWidget()
         area.setStyleSheet("""
-                    background-color: #16DB65;
-                    border-radius: 10px;
-                """)
+            background-color: #16DB65;
+            border-radius: 17px;
+        """)
         area.setLayout(layout)
 
         self.app_scroll_list = QScrollArea()
@@ -326,29 +433,6 @@ class MainWindow(QMainWindow):
         self.app_scroll_list.setWidgetResizable(True)
         self.app_scroll_list.verticalScrollBar().setSingleStep(10)
         self.app_scroll_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-
-    @staticmethod
-    def app_limit_button_clicked():
-        notification = QMessageBox()
-        # todo: rephrase this text
-        notification.setWindowTitle("App Limit")
-        notification.setText(
-            "Feature Coming Soon\n\n"
-            "This button will set a time limit for the app and notify you when the time is crossed.")
-        notification.setIcon(QMessageBox.Icon.Information)
-        notification.setStandardButtons(QMessageBox.StandardButton.Ok)
-        notification.setStyleSheet("""
-                font-family: Century Gothic;
-                font-size: 15px;
-                color: #16DB65;
-            """)
-        notification.setWindowIcon(QIcon("assets/ReConnect Logo.png"))
-        # set border of button to be green
-        notification.button(QMessageBox.StandardButton.Ok).setStyleSheet("""
-                background-color: #16DB65; 
-                color: #021002;
-            """)
-        notification.exec()
 
     def previous_week_button_clicked(self):
         if self.week_selected.sunday == PySide6.QtCore.QDate.currentDate().addDays(

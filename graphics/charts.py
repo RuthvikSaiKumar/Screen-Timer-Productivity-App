@@ -4,12 +4,14 @@ import PySide6.QtWidgets
 
 
 # todo: make the pie chart to show the weekly app usage, not daily
+# todo: make it much more visually appealing
 class PieChart:
     def __init__(self):
         self.time = {}
         self.pie = QtCharts.QPieSeries()
         self.pie.setLabelsVisible(True)
         self.pie.hovered.connect(lambda status, slice: self.handle_pie_hovered(status, slice))
+        self.pie.setPieSize(1)
         # self.pie.setHoleSize(0.5)
 
         self.chart = QtCharts.QChart()
@@ -18,6 +20,7 @@ class PieChart:
         self.chart.setTheme(QtCharts.QChart.ChartTheme.ChartThemeDark)
         self.chart.setBackgroundRoundness(10)
         self.chart.setBackgroundBrush(PySide6.QtGui.QBrush(PySide6.QtGui.QColor("#0D2818")))
+        self.chart.legend().hide()
 
         self.chart_view = QtCharts.QChartView(self.chart)
         self.chart_view.setRenderHint(PySide6.QtGui.QPainter.RenderHint.Antialiasing)
@@ -39,7 +42,7 @@ class PieChart:
     def handle_pie_hovered(slice, status):
         if status:
             value = slice.percentage() * 100
-            category = slice.label()
+            category = slice.label() if len(slice.label()) <= 15 else f"{slice.label()[:15]}..."
 
             PySide6.QtWidgets.QToolTip.showText(PySide6.QtGui.QCursor.pos(), f"{category} : {value:.2f}%")
 
@@ -79,7 +82,6 @@ class HorizontalBarChart:
     def add(self, name, value):
 
         # todo: there must be a better way to add items instead of creating a new BarSet every time
-        # todo: app data not correlating with the pie chart
 
         self.time[name] = value
         self.time = dict(sorted(self.time.items(), key=lambda item: item[1], reverse=False))
@@ -97,6 +99,7 @@ class HorizontalBarChart:
 
         self.axis_x.setRange(0, max(self.time.values()))
 
+        self.axis_y.clear()
         self.axis_y.append(list(self.time.keys()))
         self.bar_chart.update()
 
@@ -104,6 +107,7 @@ class HorizontalBarChart:
         if status:
             value = bar_set.at(index)
             category = self.axis_y.at(index)
+            category = category if len(category) <= 15 else f"{category[:15]}..."
             hours = int(value)
             minutes = int((value - hours) * 60)
 
