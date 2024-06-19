@@ -6,9 +6,11 @@ chache file
 import pygetwindow as gw
 import time
 from datetime import date
+import datetime
 import pickle
 import psutil
 import pandas as pd
+import os
 # from user_agents import parse
 
 # This class is supposed to give the main file, the data on current window. 
@@ -118,9 +120,12 @@ class WindowsModel:
     def process_data(self):
         df = pd.DataFrame(self.data_dict)
         current_datetime = datetime.datetime.now()
-        file_name = f"window_screentime_{current_datetime.strtime('%Y-%m-%d_%H-%M-%S')}.pkl"
-        df.to_pickle(file_name)
-        print(f"Data saved to {file_name}")
+        self.file_name = f"window_screentime_{current_datetime.strftime('%Y-%m-%d_%H-%M-%S')}.pkl"
+        folder_path = 'user-data'
+        file_path = os.path.join(folder_path, self.file_name)
+        df.to_pickle(file_path)
+        print(f"Data saved to {file_path}")
+
 
 # TODO : Implement a way to avoid loss of data from certain applications due to the limits of pygetwindow
 # TODO : Make the code for data_traverse such that it reads the data from the cache completely and store it in a dict which is then shared to another file.
