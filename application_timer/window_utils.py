@@ -6,9 +6,12 @@ chache file
 import pygetwindow as gw
 import time
 from datetime import date
+import datetime
 import pickle
 import psutil
 import pandas as pd
+
+
 # from user_agents import parse
 
 # This class is supposed to give the main file, the data on current window. 
@@ -24,19 +27,21 @@ class WindowUtils():
         self.save_path = 'window_screentime_cache.pkl'
         self.last_save_time = time.time()
         # self.browser = user_agent.browser.family
-        self.browser_list = ["Chrome", "Firefox", "Edge", "Safari", "Opera", "Internet Explorer", "Vivaldi", "Brave", "Torch", "Yandex Browser", "Maxthon", "Coc Coc", "Comodo Dragon", "Epic Privacy Browser", "Waterfox", "Pale Moon", "SeaMonkey", "Tor Browser", "Brave Privacy Browser", "K-Meleon"]
+        self.browser_list = ["Chrome", "Firefox", "Edge", "Safari", "Opera", "Internet Explorer", "Vivaldi", "Brave",
+                             "Torch", "Yandex Browser", "Maxthon", "Coc Coc", "Comodo Dragon", "Epic Privacy Browser",
+                             "Waterfox", "Pale Moon", "SeaMonkey", "Tor Browser", "Brave Privacy Browser", "K-Meleon"]
 
     # This method will enable us to call this function and make a save of data for each session and renew the dict.
     def refresh_data(self):
         self.window_screentime = {}
 
-    def save_data(self, interrupt= False):
+    def save_data(self, interrupt=False):
         # Save the data in a temp file for the session every 2min.
         current_time = time.time()
-        if current_time -  self.last_save_time >= 120 or interrupt:
+        if current_time - self.last_save_time >= 120 or interrupt:
             with open(self.save_path, "wb") as f:
                 pickle.dump(self.window_screentime, f)
-            self.window_screentime = {}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+            self.window_screentime = {}
             self.last_save_time = current_time
 
     def data_parse(self):
@@ -54,16 +59,16 @@ class WindowUtils():
         except KeyboardInterrupt:
             pass
         return "application"
-    
+
     def process_data(self):
         model = WindowsModel(self.window_screentime)
         model.process_data()
 
     def window_grab(self):
-    # This loop should run infinitely unless inturrepted via keyboard
+        # This loop should run infinitely unless interrupted via keyboard
         while True:
-        # This try and except blocks help in detecting the focused windows and their times whilst 
-        # handling the exceptions of keyboard intruption 
+            # This try and except blocks help in detecting the focused windows and their times whilst
+            # handling the exceptions to keyboard interruption
             try:
                 window = gw.getActiveWindow()
                 if self.previous_window != window:
@@ -80,7 +85,7 @@ class WindowUtils():
                                 "hours": int(window_time_hhmmss.split(":")[0]),
                                 "minutes": int(window_time_hhmmss.split(":")[1]),
                                 "seconds": int(window_time_hhmmss.split(":")[2]),
-                                }
+                            }
                         }
                         self.save_data()
 
@@ -103,12 +108,11 @@ class WindowUtils():
                             "hours": int(window_time_hhmmss.split(":")[0]),
                             "minutes": int(window_time_hhmmss.split(":")[1]),
                             "seconds": int(window_time_hhmmss.split(":")[2]),
-                            }
+                        }
                     }
                     print(self.window_screentime)
                 self.save_data(interrupt=True)
                 break
-
 
 
 class WindowsModel:
@@ -122,5 +126,6 @@ class WindowsModel:
         df.to_pickle(file_name)
         print(f"Data saved to {file_name}")
 
-# TODO : Implement a way to avoid loss of data from certain applications due to the limits of pygetwindow
-# TODO : Make the code for data_traverse such that it reads the data from the cache completely and store it in a dict which is then shared to another file.
+# TODO : Implement a way to avoid loss of data from certain applications due to the limits of pygetwindow TODO : Make
+#  the code for data_traverse such that it reads the data from the cache completely and store it in a dict which is
+#  then shared to another file.
