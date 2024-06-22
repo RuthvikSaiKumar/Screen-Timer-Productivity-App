@@ -9,17 +9,31 @@ from datetime import datetime, timedelta
 
 # Set up tracking of active window
 class WindowTracker:
-    def __init__(self):
+    def __init__(self, data_handler):
         self.current_window = None
         self.start_time = None
-        self.data = {}
+        try:
+            self.data = data_handler.load_data('data.pkl') or {}
+        except Exception as e:
+            logging.error(f"Error loading data from data.pkl: {e}")
+            self.data = {}
+        self.data_handler = data_handler
+        self.browsers = ["Google Chrome", "Mozilla Firefox", "Microsoft Edge", "Opera"]
+
 
     # Simplify the window name. Removes redundant information.
-    @staticmethod
-    def simplify_name(window_name):
-        if ' - ' in window_name:
-            window_name = window_name.split(' - ')[-1]
-        return window_name
+    def simplify_name(self,window_name):
+        parts = window_name.split(' - ')
+        if len(parts) > 1:
+            if any(browser in parts[-1] for browser in self.browsers):
+            # It's a browser window, use the part before the last ' - '
+                return parts[-2]
+            else:
+            # It's an application window, use the last part after the last ' - '
+                return parts[-1]
+        else:
+            return window_name
+
 
     # Convert seconds to hh:mm:ss format
     @staticmethod
@@ -29,11 +43,17 @@ class WindowTracker:
         seconds = int(seconds % 60)
         return f"{hours:02}:{minutes:02}:{seconds:02}"
 
+    # Convert hh:mm:ss to seconds
+    @staticmethod
+    def _hhmmss_to_seconds(hhmmss):
+        hours, minutes, seconds = map(int, hhmmss.split(':'))
+        return hours * 3600 + minutes * 60 + seconds
+
     # Uses the getActiveWindow() function from pygetwindow to get the active window
     def get_active_window(self):
         window = gw.getActiveWindow()
         if window:
-            return self.simplify_name(window.title)
+            return window.title
         return None
     
     # Update the time spent on the current window
@@ -44,33 +64,54 @@ class WindowTracker:
             date_str = time.strftime("%Y-%m-%d")
             if date_str not in self.data:
                 self.data[date_str] = {}
-            if self.current_window not in self.data[date_str]:
-                self.data[date_str][self.current_window] = {
-                    "app_type": "Application",
-                    "time_spent": "00:00:00",
-                    "tabs": {}
-                }
-            total_seconds = self._hhmmss_to_seconds(self.data[date_str][self.current_window]["time_spent"]) + duration
-            self.data[date_str][self.current_window]["time_spent"] = self.seconds_to_hhmmss(total_seconds)
-            logging.info(f"Updated time spent on {self.current_window}: {self.data[date_str][self.current_window]['time_spent']}")
 
-    @staticmethod
-    def _hhmmss_to_seconds(hhmmss):
-        hours, minutes, seconds = map(int, hhmmss.split(':'))
-        return hours * 3600 + minutes * 60 + seconds
+            window_title = self.current_window
+            app_type = "Browser" if any(browser in window_title for browser in self.browsers) else "Application"
 
-    def track(self):
-        while True:
-            active_window = self.get_active_window()
-            if active_window != self.current_window:
-                self.update_time_spent()
-                logging.info(f"Switched to window: {active_window}")
-                self.current_window = active_window
-                self.start_time = time.time()
-            time.sleep(1)
-                
-    
-    def clean_old_data(self, days_to_keep=30): # Alter the days_to_keep parameter to change the number of days to keep data for
+            if app_type == "Browser":
+            # Extract browser name from window title
+                browser_name = next((browser for browser in self.browsers if browser in window_title), None)
+                tab_name = self.simplify_name(window_title)
+
+                if browser_name:
+                    if browser_name not in self.data[date_str]:
+                        self.data[date_str][browser_name] = {
+                            "app_type": app_type,
+                            "time_spent": "00:00:00",
+                            "tabs": {}
+                        }
+
+                    total_seconds_browser = self._hhmmss_to_seconds(self.data[date_str][browser_name]["time_spent"]) + duration
+                    self.data[date_str][browser_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_browser)
+
+                    if tab_name not in self.data[date_str][browser_name]["tabs"]:
+                        self.data[date_str][browser_name]["tabs"][tab_name] = "00:00:00"
+
+                    tab_seconds = self._hhmmss_to_seconds(self.data[date_str][browser_name]["tabs"][tab_name]) + duration
+                    self.data[date_str][browser_name]["tabs"][tab_name] = self.seconds_to_hhmmss(tab_seconds)
+                    logging.info(f"Updated time spent on {browser_name} - Tab: {tab_name}: {self.data[date_str][browser_name]['tabs'][tab_name]}")
+                else:
+                    logging.warning(f"Browser name not recognized for window title: {window_title}")
+
+            else:  # Application
+                window_name = self.simplify_name(window_title)
+
+                if window_name not in self.data[date_str]:
+                    self.data[date_str][window_name] = {
+                        "app_type": app_type,
+                        "time_spent": "00:00:00",
+                        "tabs": {}
+                    }
+
+                total_seconds_app = self._hhmmss_to_seconds(self.data[date_str][window_name]["time_spent"]) + duration
+                self.data[date_str][window_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_app)
+                logging.info(f"Updated time spent on {window_name}: {self.data[date_str][window_name]['time_spent']}")
+
+        else:
+            logging.warning("Current window is None, cannot update time spent.")
+
+
+    def clean_old_data(self, days_to_keep=30):
         current_date = datetime.now()
         cutoff_date = current_date - timedelta(days=days_to_keep)
         dates_to_delete = [date for date in self.data if datetime.strptime(date, "%Y-%m-%d") < cutoff_date]
@@ -79,12 +120,18 @@ class WindowTracker:
         logging.info(f"Deleted data older than {cutoff_date.strftime('%Y-%m-%d')}")
 
     def track(self):
-        while True:
-            active_window = self.get_active_window()
-            if active_window != self.current_window:
-                self.update_time_spent()
-                self.clean_old_data()  # Clean old data during tracking
-                logging.info(f"Switched to window: {active_window}")
-                self.current_window = active_window
-                self.start_time = time.time()
-            time.sleep(1)
+        try:
+            while True:
+                active_window = self.get_active_window()
+                if active_window != self.current_window:
+                    self.update_time_spent()
+                    self.clean_old_data()
+                    logging.info(f"Switched to window: {active_window}")
+                    self.current_window = active_window
+                    self.start_time = time.time()
+                time.sleep(1)
+        except KeyboardInterrupt:
+            self.update_time_spent()
+            self.data_handler.save_data(self.data, 'data.pkl')
+            logging.info("Application stopped, updated final time spent.")
+            print(self.data)
