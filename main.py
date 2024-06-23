@@ -1,9 +1,9 @@
 from PySide6.QtWidgets import QApplication
-import graphics
+import ui
 import sys
 
 app = QApplication(sys.argv)
-window = graphics.MainWindow()
+window = ui.MainWindow()
 
 window.show()
 app.exec()

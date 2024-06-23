@@ -1,0 +1,24 @@
+[
+  {
+    "2024-06-22": {
+      "Visual Studio Code": {
+        "app_type": "Application",
+        "time_spent": "00:00:03",
+        "tabs": {}
+      },
+      "Opera": {
+        "app_type": "Browser",
+        "time_spent": "00:00:04",
+        "tabs": {
+          "YouTube": "00:00:03",
+          "Google Search": "00:00:01"
+        }
+      },
+      "Task Switching": {
+        "app_type": "Application",
+        "time_spent": "00:00:01",
+        "tabs": {}
+      }
+    }
+  }
+]
