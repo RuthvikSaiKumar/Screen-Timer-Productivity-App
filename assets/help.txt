@@ -1,0 +1,18 @@
+Welcome to ReConnect!
+
+Helping you manage your PC screen time effectively.
+
+Getting Started:
+
+1. Explore Your Homepage
+    Here, you can view and analyze your screen time data in various formats.
+        Weekly Analysis: Track your screen time on a weekly basis.
+        Application Insights: Identify which applications consume most of your time.
+        Browser Usage: See detailed reports on your time spent on different browser tabs.
+
+2. Navigate the Action Bar
+    Located at the top of your screen, the action bar offers two main options:
+        Screen Time: View detailed screen time statistics and insights.
+        Focus: Set timers to enhance your productivity. (Note: This feature is still under development)
+
+We hope you find ReConnect helpful in managing your screen time!

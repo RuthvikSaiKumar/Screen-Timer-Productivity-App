@@ -1,14 +1,17 @@
 import random
 
 import PySide6.QtCore
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QMainWindow, QGridLayout, QScrollArea, QTabWidget, QVBoxLayout
+from PySide6.QtGui import QIcon, Qt
+from PySide6.QtWidgets import QMainWindow, QGridLayout, QScrollArea, QTabWidget, QVBoxLayout, QPushButton, \
+    QHBoxLayout, QLabel, QMessageBox, QWidget, QDialog
 
 from ui.charts import PieChart, HorizontalBarChart, WeeklyVerticalBarChart
-from ui.data_reader import *
+from ui.data_reader import WeekData, AppItem, read_data
 
 
 class MainWindow(QMainWindow):
+    github: QPushButton
+    switch_theme_button: QPushButton
     help_button: QPushButton
     week_selected: WeekData
     hlayout: QHBoxLayout
@@ -36,23 +39,14 @@ class MainWindow(QMainWindow):
 
         self.create_title_bar()
 
-        # TEST DATA ##########################################################
-        self.test_app_data = [AppData(f"App{i}", random.randrange(1, 10) / 2) for i in range(random.randrange(0, 7))]
-        browser = AppData("Browser", random.randrange(1, 10) / 2)
-        browser.set_browser()
-        for i in range(random.randrange(0, 7)):
-            browser.add_tab(TabData(f"Tab{i}", random.randrange(1, 10) / 2))
-        if browser.browser_tabs is None:
-            browser.browser_tabs = []
-        self.test_app_data.append(browser)
+        # DATA ###############################################################
+        self.loaded_data = read_data()
         ######################################################################
 
         self.create_pie_chart()
         self.create_daily_bar_chart()
         self.create_weekly_bar_chart()
         self.create_app_list()
-
-        self.create_help_button()
 
         ############################################
 
@@ -107,7 +101,7 @@ class MainWindow(QMainWindow):
         }
         QTabBar::tab:selected { 
             border-bottom: 2px solid #16DB65; 
-            color: #16DB65;
+            color: #38AD6B;
         }
         QTabWidget::pane {
             border: 0;
@@ -123,9 +117,16 @@ class MainWindow(QMainWindow):
         tab_widget.setCurrentIndex(0)
 
         ###############################################################################################
+
+        self.create_help_button()
+        self.create_switch_theme_button()
+        self.create_github_link()
+
         bottom_bar = QHBoxLayout()
         bottom_bar.setAlignment(Qt.AlignmentFlag.AlignRight)
+        bottom_bar.addWidget(self.switch_theme_button)
         bottom_bar.addWidget(self.help_button)
+        bottom_bar.addWidget(self.github)
 
         self.vlayout = QVBoxLayout()
         self.vlayout.addLayout(self.hlayout)
@@ -138,7 +139,6 @@ class MainWindow(QMainWindow):
 
     def init_window(self):
         self.setWindowTitle("ReConnect - Productivity Tracker")
-        self.setGeometry(200, 100, 600, 600)
         self.setMinimumSize(900, 600)
         icon = QIcon("assets/ReConnect Logo.png")
         self.setWindowIcon(icon)
@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
         title.setStyleSheet("""
             font-family: Century Gothic;
             font-size: 24px;
-            color: #16DB65;
+            color: #38AD6B;
             font-weight: bold;
         """)
 
@@ -178,7 +178,7 @@ class MainWindow(QMainWindow):
         """)
 
         self.pie_chart = PieChart()
-        for app in self.test_app_data:
+        for app in self.loaded_data:
             self.pie_chart.add(app.name, app.time)
 
     def create_daily_bar_chart(self):
@@ -192,13 +192,13 @@ class MainWindow(QMainWindow):
 
         self.daily_bar = HorizontalBarChart()
 
-        app_time_sorted = sorted(self.test_app_data, key=lambda app_: app_.time, reverse=True)
+        app_time_sorted = sorted(self.loaded_data, key=lambda app_: app_.time, reverse=True)
 
         for app in app_time_sorted[:5]:
             self.daily_bar.add(app.name, app.time)
 
     def create_weekly_bar_chart(self):
-        current_day_of_week = PySide6.QtCore.QDate.currentDate().dayOfWeek()
+        current_day_of_week = PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7
         self.week_selected = WeekData()
         self.week_selected.set(PySide6.QtCore.QDate.currentDate().addDays(-current_day_of_week))
 
@@ -221,7 +221,7 @@ class MainWindow(QMainWindow):
 
         self.previous_week_button = QPushButton("<")
         self.previous_week_button.setStyleSheet("""
-            background-color: #16DB65;
+            background-color: #38AD6B;
             color: #021002;
             font-family: Century Gothic;
             font-size: 16px;
@@ -235,8 +235,7 @@ class MainWindow(QMainWindow):
 
         self.next_week_button = QPushButton(">")
         self.set_next_week_button(
-            self.week_selected.sunday != PySide6.QtCore.QDate.currentDate().addDays(
-                -PySide6.QtCore.QDate.currentDate().dayOfWeek()))
+            self.week_selected.sunday != PySide6.QtCore.QDate.currentDate().addDays(-current_day_of_week))
 
         self.next_week_button.setMinimumWidth(20)
         self.next_week_button.setMaximumWidth(20)
@@ -253,6 +252,7 @@ class MainWindow(QMainWindow):
         # todo: create a button for browser to show or hide tabs
         # todo: add a button to set a time limit for the app / tab
         # todo: the background should not scroll
+        # todo: move the widget a little down so it aligns with the chart
 
         self.app_usage_list_label = QLabel("App Usage List")
         self.app_usage_list_label.setAlignment(PySide6.QtCore.Qt.AlignmentFlag.AlignCenter)
@@ -265,7 +265,7 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        app_time_sorted = sorted(self.test_app_data, key=lambda app_: app_.time, reverse=True)
+        app_time_sorted = sorted(self.loaded_data, key=lambda app_: app_.time, reverse=True)
 
         for app in app_time_sorted:
             item = AppItem(app)
@@ -296,7 +296,7 @@ class MainWindow(QMainWindow):
 
         area = QWidget()
         area.setStyleSheet("""
-            background-color: #16DB65;
+            background-color: #38AD6B;
             border-radius: 17px;
         """)
         area.setLayout(layout)
@@ -309,7 +309,7 @@ class MainWindow(QMainWindow):
 
     def previous_week_button_clicked(self):
         if self.week_selected.sunday == PySide6.QtCore.QDate.currentDate().addDays(
-                -PySide6.QtCore.QDate.currentDate().dayOfWeek()):
+                -PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7):
             self.set_next_week_button(True)
 
         self.week_selected.set(self.week_selected.sunday.addDays(-7))
@@ -322,7 +322,7 @@ class MainWindow(QMainWindow):
         self.weekly_bar_label.setText(f"Weekly Screen Time ({self.week_selected})")
 
         if self.week_selected.sunday == PySide6.QtCore.QDate.currentDate().addDays(
-                -PySide6.QtCore.QDate.currentDate().dayOfWeek()):
+                -PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7):
             self.set_next_week_button(False)
 
     # todo: actually update the weekly bar chart
@@ -330,7 +330,7 @@ class MainWindow(QMainWindow):
     def set_next_week_button(self, enabled: bool):
         self.next_week_button.setEnabled(enabled)
         self.next_week_button.setStyleSheet(f"""
-            background-color: {"#16DB65" if enabled else "#0C7034"};
+            background-color: {"#38AD6B" if enabled else "#0C7034"};
             color: #021002;
             font-family: Century Gothic;
             font-size: 16px;
@@ -339,7 +339,10 @@ class MainWindow(QMainWindow):
         """)
 
     def create_help_button(self):
-        self.help_button = QPushButton("?", self)
+        self.help_button = QPushButton()
+        self.help_button.setIcon(QIcon("assets/help.png"))
+        self.help_button.setIconSize(PySide6.QtCore.QSize(20, 20))
+        self.help_button.setToolTip("Help / Getting Started")
         self.help_button.setStyleSheet("""
             background-color: #16DB65;
             color: #021002;
@@ -351,23 +354,97 @@ class MainWindow(QMainWindow):
         self.help_button.setMinimumSize(30, 30)
         self.help_button.setMaximumSize(30, 30)
 
-        self.help_button.clicked.connect(self.on_floating_button_clicked)
+        self.help_button.clicked.connect(self.on_help_button_clicked)
 
     @staticmethod
-    def on_floating_button_clicked():
+    def on_help_button_clicked():
+        help_dialog = QDialog()
+        help_dialog.setWindowTitle("Help")
+        help_dialog.setMinimumSize(800, 400)
+        help_dialog.setStyleSheet("""
+                background-color: #021002;
+        """)
+        help_dialog.setWindowIcon(QIcon("assets/ReConnect Logo.png"))
+
+        with open("assets/help.txt", "r") as file:
+            help_text = file.read()
+        help_text = QLabel(help_text)
+
+        help_text.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 16px;
+            color: #16DB65;
+        """)
+
+        layout = QVBoxLayout()
+        layout.addWidget(help_text)
+        help_dialog.setLayout(layout)
+
+        help_dialog.exec()
+
+    def create_switch_theme_button(self):
+        self.switch_theme_button = QPushButton()
+        self.switch_theme_button.setIcon(QIcon("assets/theme.png"))
+        self.switch_theme_button.setIconSize(PySide6.QtCore.QSize(20, 20))
+        self.switch_theme_button.setToolTip("Switch Theme")
+        self.switch_theme_button.setStyleSheet("""
+            background-color: #16DB65;
+            color: #021002;
+            border-radius: 10px;
+            font-family: Century Gothic;
+            font-size: 16px;
+            font-weight: bold;
+        """)
+        self.switch_theme_button.setMinimumSize(30, 30)
+        self.switch_theme_button.setMaximumSize(30, 30)
+
+        self.switch_theme_button.clicked.connect(self.on_switch_theme_button_clicked)
+
+    @staticmethod
+    def on_switch_theme_button_clicked():
+
+        # todo: switch between dark and light theme
+
         notification = QMessageBox()
-        notification.setWindowTitle("Help")
-        notification.setText("This is the help button.")
-        notification.setIcon(QMessageBox.Icon.Information)
+        notification.setWindowTitle("Switch Theme")
+        notification.setText(
+            "Feature Under Development\n\n"
+            "This button will allow you to change the theme of the app."
+        )
         notification.setStandardButtons(QMessageBox.StandardButton.Ok)
         notification.setStyleSheet("""
-                font-family: Century Gothic;
-                font-size: 15px;
-                color: #16DB65;
-            """)
+            font-family: Century Gothic;
+            font-size: 15px;
+            color: #16DB65;
+        """)
         notification.setWindowIcon(QIcon("assets/ReConnect Logo.png"))
         notification.button(QMessageBox.StandardButton.Ok).setStyleSheet("""
-                background-color: #16DB65; 
-                color: #021002;
-            """)
+            background-color: #16DB65;
+            color: #021002;
+        """)
         notification.exec()
+
+    def create_github_link(self):
+        self.github = QPushButton()
+        self.github.setIcon(QIcon("assets/github.png"))
+        self.github.setIconSize(PySide6.QtCore.QSize(20, 20))
+        self.github.setToolTip("Open GitHub Repository")
+        self.github.setStyleSheet("""
+            background-color: #16DB65;
+            color: #021002;
+            border-radius: 10px;
+            font-family: Century Gothic;
+            font-size: 16px;
+            font-weight: bold;
+        """)
+        self.github.setMinimumSize(30, 30)
+        self.github.setMaximumSize(30, 30)
+
+        self.github.clicked.connect(self.on_github_clicked)
+
+    @staticmethod
+    def on_github_clicked():
+        import webbrowser
+        # todo: change it to organization's repository
+        url = "https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App"
+        webbrowser.open(url)

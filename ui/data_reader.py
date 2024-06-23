@@ -18,6 +18,16 @@ def float_to_time(time: float):
     return f"{hours} hr {minutes} min"
 
 
+def time_to_float(time: str):
+    #     time format: "hh:mm:ss"
+    time = time.split(':')
+    hours = int(time[0])
+    minutes = int(time[1])
+    seconds = int(time[2])
+
+    return hours + minutes / 60 + seconds / 3600
+
+
 @dataclasses.dataclass
 class WeekData:
     sunday: PySide6.QtCore.QDate = None
@@ -99,7 +109,7 @@ class AppItem:
 
         self.app_set_app_limit = QPushButton()
         self.app_set_app_limit.setStyleSheet("""
-            background-color: #16DB65;
+            background-color: #38AD6B;
             color: #021002;
             border-radius: 10px;
         """)
@@ -122,8 +132,10 @@ class AppItem:
         # todo: rephrase this text
         notification.setWindowTitle("App Limit")
         notification.setText(
-            "Feature Coming Soon\n\n"
-            "This button will set a time limit for the app and notify you when the time is crossed.")
+            "Feature Under Development\n\n"
+            "This button will allow you to set a time limit for app usage. \n"
+            "You will be notified once the limit is exceeded."
+        )
         notification.setIcon(QMessageBox.Icon.Information)
         notification.setStandardButtons(QMessageBox.StandardButton.Ok)
         notification.setStyleSheet("""
@@ -140,20 +152,40 @@ class AppItem:
         notification.exec()
 
 
+# self.test_app_data = [AppData(f"App{i}", random.randrange(1, 10) / 2) for i in range(random.randrange(0, 7))]
+# browser = AppData("Browser", random.randrange(1, 10) / 2)
+# browser.set_browser()
+# for i in range(random.randrange(0, 7)):
+#     browser.add_tab(TabData(f"Tab{i}", random.randrange(1, 10) / 2))
+# if browser.browser_tabs is None:
+#     browser.browser_tabs = []
+# self.test_app_data.append(browser)
+
+
 def read_data():
     json_string = json.loads(open('assets/data/test.json').read())
+
+    loaded_app_data = []
 
     for i in range(len(json_string)):
         current = json_string[i]
         for date in current:
-            print(date)
+            # print(date)
 
             for app in current[date]:
-                print(app, '-', current[date][app]['app_type'], ':', current[date][app]['time_spent'])
+                # print(app, '-', current[date][app]['app_type'], ':', current[date][app]['time_spent'])
+
+                if current[date][app]['app_type'] == 'Application':
+                    loaded_app_data.append(AppData(app, time_to_float(current[date][app]['time_spent'])))
 
                 if current[date][app]['app_type'] == 'Browser':
+                    browser = AppData(app, time_to_float(current[date][app]['time_spent']))
+                    browser.set_browser()
                     for tab in current[date][app]['tabs']:
-                        print('\t', tab, ':', current[date][app]['tabs'][tab])
+                        browser.add_tab(TabData(tab, time_to_float(current[date][app]['tabs'][tab])))
+                    loaded_app_data.append(browser)
 
+                    # for tab in current[date][app]['tabs']:
+                    #     print('\t', tab, ':', current[date][app]['tabs'][tab])
 
-read_data()
+    return loaded_app_data

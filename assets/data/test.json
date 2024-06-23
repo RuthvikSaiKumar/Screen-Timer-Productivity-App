@@ -3,15 +3,15 @@
     "2024-06-22": {
       "Visual Studio Code": {
         "app_type": "Application",
-        "time_spent": "00:00:03",
+        "time_spent": "03:46:03",
         "tabs": {}
       },
       "Opera": {
         "app_type": "Browser",
-        "time_spent": "00:00:04",
+        "time_spent": "01:30:00",
         "tabs": {
-          "YouTube": "00:00:03",
-          "Google Search": "00:00:01"
+          "YouTube": "01:00:00",
+          "Google Search": "00:30:0"
         }
       },
       "Task Switching": {
