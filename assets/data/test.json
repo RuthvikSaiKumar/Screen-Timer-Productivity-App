@@ -11,12 +11,34 @@
         "time_spent": "01:30:00",
         "tabs": {
           "YouTube": "01:00:00",
-          "Google Search": "00:30:0"
+          "Google Search": "00:30:00"
         }
       },
       "Task Switching": {
         "app_type": "Application",
         "time_spent": "00:00:01",
+        "tabs": {}
+      }
+    }
+  },
+  {
+    "2024-06-23": {
+      "Visual Studio Code": {
+        "app_type": "Application",
+        "time_spent": "02:07:53",
+        "tabs": {}
+      },
+      "Opera": {
+        "app_type": "Browser",
+        "time_spent": "02:45:00",
+        "tabs": {
+          "YouTube": "01:45:00",
+          "Google Search": "01:00:00"
+        }
+      },
+      "Task Switching": {
+        "app_type": "Application",
+        "time_spent": "00:00:51",
         "tabs": {}
       }
     }

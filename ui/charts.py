@@ -81,8 +81,6 @@ class HorizontalBarChart:
 
     def add(self, name, value):
 
-        # todo: there must be a better way to add items instead of creating a new BarSet every time
-
         self.time[name] = value
         self.time = dict(sorted(self.time.items(), key=lambda item: item[1], reverse=False))
 
@@ -125,7 +123,7 @@ class WeeklyVerticalBarChart:
         self.bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index, self.bar))
 
         self.week = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-        self.hours = [0, 0, 0, 0, 0, 0, 0]
+        self.hours = [0] * 7
         for time in self.hours:
             self.bar.append(time)
 
@@ -147,6 +145,8 @@ class WeeklyVerticalBarChart:
 
         self.axis_y = QtCharts.QValueAxis()
         self.axis_y.setLabelFormat("%i h")
+        self.axis_y.setTickType(QtCharts.QValueAxis.TickType.TicksDynamic)
+        self.axis_y.setTickInterval(1)
         self.bar_chart.setAxisY(self.axis_y, self.bar_series)
 
         self.bar_chart_view = QtCharts.QChartView(self.bar_chart)
@@ -157,9 +157,7 @@ class WeeklyVerticalBarChart:
 
     def add(self, day, value):
 
-        # todo: there must be a better way to add items instead of creating a new BarSet every time
-
-        self.hours[self.week.index(day)] = value
+        self.hours[day] = value
 
         self.bar = QtCharts.QBarSet("Weekly")
         self.bar.hovered.connect(lambda status, index: self.handle_bar_hovered(status, index, self.bar))

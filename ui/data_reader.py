@@ -28,21 +28,6 @@ def time_to_float(time: str):
     return hours + minutes / 60 + seconds / 3600
 
 
-@dataclasses.dataclass
-class WeekData:
-    sunday: PySide6.QtCore.QDate = None
-    saturday: PySide6.QtCore.QDate = None
-
-    def set(self, sunday):
-        if sunday.dayOfWeek() != 7:
-            raise ValueError(f"The date provided is not a Sunday. Provided Date: {sunday.toString()}")
-        self.sunday = sunday
-        self.saturday = sunday.addDays(6)
-
-    def __repr__(self):
-        return f"{self.sunday.toString('dd MMM')} - {self.saturday.toString('dd MMM')}"
-
-
 class DataInterface:
     name: str
     time: float
@@ -129,7 +114,6 @@ class AppItem:
     @staticmethod
     def app_limit_button_clicked():
         notification = QMessageBox()
-        # todo: rephrase this text
         notification.setWindowTitle("App Limit")
         notification.setText(
             "Feature Under Development\n\n"
@@ -165,12 +149,14 @@ class AppItem:
 def read_data():
     json_string = json.loads(open('assets/data/test.json').read())
 
-    loaded_app_data = []
+    total_data = {}
 
     for i in range(len(json_string)):
         current = json_string[i]
         for date in current:
             # print(date)
+
+            loaded_app_data = []
 
             for app in current[date]:
                 # print(app, '-', current[date][app]['app_type'], ':', current[date][app]['time_spent'])
@@ -188,4 +174,6 @@ def read_data():
                     # for tab in current[date][app]['tabs']:
                     #     print('\t', tab, ':', current[date][app]['tabs'][tab])
 
-    return loaded_app_data
+            total_data[date] = loaded_app_data
+
+    return total_data

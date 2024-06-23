@@ -1,4 +1,4 @@
-import random
+import dataclasses
 
 import PySide6.QtCore
 from PySide6.QtGui import QIcon, Qt
@@ -6,7 +6,22 @@ from PySide6.QtWidgets import QMainWindow, QGridLayout, QScrollArea, QTabWidget,
     QHBoxLayout, QLabel, QMessageBox, QWidget, QDialog
 
 from ui.charts import PieChart, HorizontalBarChart, WeeklyVerticalBarChart
-from ui.data_reader import WeekData, AppItem, read_data
+from ui.data_reader import AppItem, read_data
+
+
+@dataclasses.dataclass
+class WeekData:
+    sunday: PySide6.QtCore.QDate = None
+    saturday: PySide6.QtCore.QDate = None
+
+    def set(self, sunday):
+        if sunday.dayOfWeek() != 7:
+            raise ValueError(f"The date provided is not a Sunday. Provided Date: {sunday.toString()}")
+        self.sunday = sunday
+        self.saturday = sunday.addDays(6)
+
+    def __repr__(self):
+        return f"{self.sunday.toString('dd MMM')} - {self.saturday.toString('dd MMM')}"
 
 
 class MainWindow(QMainWindow):
@@ -33,9 +48,6 @@ class MainWindow(QMainWindow):
         self.init_window()
 
         ###############################################################################################
-
-        # todo: add a button to switch between dark and light theme
-        # todo: add a ? button at bottom right corner to show help : Getting Started
 
         self.create_title_bar()
 
@@ -178,8 +190,12 @@ class MainWindow(QMainWindow):
         """)
 
         self.pie_chart = PieChart()
-        for app in self.loaded_data:
-            self.pie_chart.add(app.name, app.time)
+
+        dates = list(self.loaded_data.keys())
+        for date in dates:
+            if date == PySide6.QtCore.QDate.currentDate().toString("yyyy-MM-dd"):
+                for app in self.loaded_data[date]:
+                    self.pie_chart.add(app.name, app.time)
 
     def create_daily_bar_chart(self):
         self.daily_bar_label = QLabel("Daily App Usage (Top 5)")
@@ -192,7 +208,10 @@ class MainWindow(QMainWindow):
 
         self.daily_bar = HorizontalBarChart()
 
-        app_time_sorted = sorted(self.loaded_data, key=lambda app_: app_.time, reverse=True)
+        dates = list(self.loaded_data.keys())
+        app_time_sorted = next((sorted(self.loaded_data[date], key=lambda app_: app_.time, reverse=True)
+                                for date in dates if date == PySide6.QtCore.QDate.currentDate().toString("yyyy-MM-dd")),
+                               [])
 
         for app in app_time_sorted[:5]:
             self.daily_bar.add(app.name, app.time)
@@ -211,13 +230,14 @@ class MainWindow(QMainWindow):
         """)
 
         self.weekly_bar = WeeklyVerticalBarChart()
-        self.weekly_bar.add("Mon", random.randrange(1, 10))
-        self.weekly_bar.add("Tue", random.randrange(1, 10))
-        self.weekly_bar.add("Wed", random.randrange(1, 10))
-        self.weekly_bar.add("Thu", random.randrange(1, 10))
-        self.weekly_bar.add("Fri", random.randrange(1, 10))
-        self.weekly_bar.add("Sat", random.randrange(1, 10))
-        self.weekly_bar.add("Sun", random.randrange(1, 10))
+
+        dates = list(self.loaded_data.keys())
+        for date in dates:
+            if (self.week_selected.sunday.toString("yyyy-MM-dd") <= date <=
+                    self.week_selected.saturday.toString("yyyy-MM-dd")):
+                total_time = sum(app.time for app in self.loaded_data[date])
+                self.weekly_bar.add(
+                    PySide6.QtCore.QDate.fromString(date, "yyyy-MM-dd").dayOfWeek() % 7, total_time)
 
         self.previous_week_button = QPushButton("<")
         self.previous_week_button.setStyleSheet("""
@@ -265,7 +285,10 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        app_time_sorted = sorted(self.loaded_data, key=lambda app_: app_.time, reverse=True)
+        dates = list(self.loaded_data.keys())
+        app_time_sorted = next((sorted(self.loaded_data[date], key=lambda app_: app_.time, reverse=True)
+                                for date in dates if date == PySide6.QtCore.QDate.currentDate().toString("yyyy-MM-dd")),
+                               [])
 
         for app in app_time_sorted:
             item = AppItem(app)
@@ -308,6 +331,10 @@ class MainWindow(QMainWindow):
         self.app_scroll_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     def previous_week_button_clicked(self):
+
+        # todo: limit to past 4 weeks
+
+        # dont change the order of the below two lines
         if self.week_selected.sunday == PySide6.QtCore.QDate.currentDate().addDays(
                 -PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7):
             self.set_next_week_button(True)
@@ -315,9 +342,18 @@ class MainWindow(QMainWindow):
         self.week_selected.set(self.week_selected.sunday.addDays(-7))
         self.weekly_bar_label.setText(f"Weekly Screen Time ({self.week_selected})")
 
-    # todo: actually update the weekly bar chart
+        self.weekly_bar.hours = [0] * 7
+        self.weekly_bar.bar_series.clear()
+        dates = list(self.loaded_data.keys())
+        for date in dates:
+            if (self.week_selected.sunday.toString("yyyy-MM-dd") <= date <=
+                    self.week_selected.saturday.toString("yyyy-MM-dd")):
+                total_time = sum(app.time for app in self.loaded_data[date])
+                self.weekly_bar.add(
+                    PySide6.QtCore.QDate.fromString(date, "yyyy-MM-dd").dayOfWeek() % 7, total_time)
 
     def next_week_button_clicked(self):
+        # dont change the order of the below two lines
         self.week_selected.set(self.week_selected.sunday.addDays(7))
         self.weekly_bar_label.setText(f"Weekly Screen Time ({self.week_selected})")
 
@@ -325,7 +361,15 @@ class MainWindow(QMainWindow):
                 -PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7):
             self.set_next_week_button(False)
 
-    # todo: actually update the weekly bar chart
+        self.weekly_bar.hours = [0] * 7
+        self.weekly_bar.bar_series.clear()
+        dates = list(self.loaded_data.keys())
+        for date in dates:
+            if (self.week_selected.sunday.toString("yyyy-MM-dd") <= date <=
+                    self.week_selected.saturday.toString("yyyy-MM-dd")):
+                total_time = sum(app.time for app in self.loaded_data[date])
+                self.weekly_bar.add(
+                    PySide6.QtCore.QDate.fromString(date, "yyyy-MM-dd").dayOfWeek() % 7, total_time)
 
     def set_next_week_button(self, enabled: bool):
         self.next_week_button.setEnabled(enabled)
