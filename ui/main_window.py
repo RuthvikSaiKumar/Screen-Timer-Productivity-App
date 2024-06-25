@@ -42,6 +42,9 @@ class MainWindow(QMainWindow):
     app_scroll_list: QScrollArea
     app_usage_list_label: QLabel
 
+    current_week_selected: int
+    week_history_limit = 3  # indexing starts from 0
+
     def __init__(self):
         super().__init__()
 
@@ -239,15 +242,10 @@ class MainWindow(QMainWindow):
                 self.weekly_bar.add(
                     PySide6.QtCore.QDate.fromString(date, "yyyy-MM-dd").dayOfWeek() % 7, total_time)
 
+        self.current_week_selected = 0
+
         self.previous_week_button = QPushButton("<")
-        self.previous_week_button.setStyleSheet("""
-            background-color: #38AD6B;
-            color: #021002;
-            font-family: Century Gothic;
-            font-size: 16px;
-            border-radius: 10px;
-            font-weight: bold;
-        """)
+        self.set_previous_week_button(True)
         self.previous_week_button.setMinimumWidth(20)
         self.previous_week_button.setMaximumWidth(20)
         self.previous_week_button.setMinimumHeight(50)
@@ -331,12 +329,9 @@ class MainWindow(QMainWindow):
         self.app_scroll_list.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     def previous_week_button_clicked(self):
-
-        # todo: limit to past 4 weeks
-
-        # dont change the order of the below two lines
+        # don't change the order of the below two lines
         if self.week_selected.sunday == PySide6.QtCore.QDate.currentDate().addDays(
-                -PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7):
+                -(PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7)):
             self.set_next_week_button(True)
 
         self.week_selected.set(self.week_selected.sunday.addDays(-7))
@@ -352,13 +347,20 @@ class MainWindow(QMainWindow):
                 self.weekly_bar.add(
                     PySide6.QtCore.QDate.fromString(date, "yyyy-MM-dd").dayOfWeek() % 7, total_time)
 
+        self.current_week_selected += 1
+
+        if self.current_week_selected >= self.week_history_limit:
+            self.set_previous_week_button(False)
+
+        print(self.current_week_selected)
+
     def next_week_button_clicked(self):
-        # dont change the order of the below two lines
+        # don't change the order of the below two lines
         self.week_selected.set(self.week_selected.sunday.addDays(7))
         self.weekly_bar_label.setText(f"Weekly Screen Time ({self.week_selected})")
 
         if self.week_selected.sunday == PySide6.QtCore.QDate.currentDate().addDays(
-                -PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7):
+                -(PySide6.QtCore.QDate.currentDate().dayOfWeek() % 7)):
             self.set_next_week_button(False)
 
         self.weekly_bar.hours = [0] * 7
@@ -371,9 +373,27 @@ class MainWindow(QMainWindow):
                 self.weekly_bar.add(
                     PySide6.QtCore.QDate.fromString(date, "yyyy-MM-dd").dayOfWeek() % 7, total_time)
 
+        self.current_week_selected -= 1
+
+        if self.current_week_selected < self.week_history_limit:
+            self.set_previous_week_button(True)
+
+        print(self.current_week_selected)
+
     def set_next_week_button(self, enabled: bool):
         self.next_week_button.setEnabled(enabled)
         self.next_week_button.setStyleSheet(f"""
+            background-color: {"#38AD6B" if enabled else "#0C7034"};
+            color: #021002;
+            font-family: Century Gothic;
+            font-size: 16px;
+            border-radius: 10px;    
+            font-weight: bold;
+        """)
+
+    def set_previous_week_button(self, enabled: bool):
+        self.previous_week_button.setEnabled(enabled)
+        self.previous_week_button.setStyleSheet(f"""
             background-color: {"#38AD6B" if enabled else "#0C7034"};
             color: #021002;
             font-family: Century Gothic;
