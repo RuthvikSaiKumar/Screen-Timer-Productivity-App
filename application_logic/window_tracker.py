@@ -1,10 +1,7 @@
-'''
-This module contains the WindowTracker class that is responsible for tracking the active window and the time spent on it.
-'''
-
 import time
 import pygetwindow as gw
 import logging
+import json
 from datetime import datetime, timedelta
 
 # Set up tracking of active window
@@ -20,20 +17,18 @@ class WindowTracker:
         self.data_handler = data_handler
         self.browsers = ["Google Chrome", "Mozilla Firefox", "Microsoft Edge", "Opera"]
 
-
     # Simplify the window name. Removes redundant information.
-    def simplify_name(self,window_name):
+    def simplify_name(self, window_name):
         parts = window_name.split(' - ')
         if len(parts) > 1:
             if any(browser in parts[-1] for browser in self.browsers):
-            # It's a browser window, use the part before the last ' - '
+                # It's a browser window, use the part before the last ' - '
                 return parts[-2]
             else:
-            # It's an application window, use the last part after the last ' - '
+                # It's an application window, use the last part after the last ' - '
                 return parts[-1]
         else:
             return window_name
-
 
     # Convert seconds to hh:mm:ss format
     @staticmethod
@@ -55,7 +50,7 @@ class WindowTracker:
         if window:
             return window.title
         return None
-    
+
     # Update the time spent on the current window
     def update_time_spent(self):
         current_time = time.time()
@@ -69,7 +64,7 @@ class WindowTracker:
             app_type = "Browser" if any(browser in window_title for browser in self.browsers) else "Application"
 
             if app_type == "Browser":
-            # Extract browser name from window title
+                # Extract browser name from window title
                 browser_name = next((browser for browser in self.browsers if browser in window_title), None)
                 tab_name = self.simplify_name(window_title)
 
@@ -110,7 +105,6 @@ class WindowTracker:
         else:
             logging.warning("Current window is None, cannot update time spent.")
 
-
     def clean_old_data(self, days_to_keep=30):
         current_date = datetime.now()
         cutoff_date = current_date - timedelta(days=days_to_keep)
@@ -118,6 +112,9 @@ class WindowTracker:
         for date in dates_to_delete:
             del self.data[date]
         logging.info(f"Deleted data older than {cutoff_date.strftime('%Y-%m-%d')}")
+
+    def to_json(self):
+        return json.dumps(self.data, indent=4)
 
     def track(self):
         try:
@@ -134,4 +131,4 @@ class WindowTracker:
             self.update_time_spent()
             self.data_handler.save_data(self.data, 'data.pkl')
             logging.info("Application stopped, updated final time spent.")
-            print(self.data)
+            print(self.to_json())
