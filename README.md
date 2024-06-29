@@ -1,3 +1,4 @@
+
 # 📊 Screen-Timer-Productivity-App
 
 ## Welcome to ReConnect!
@@ -5,7 +6,7 @@
 
 ---
 
-This application runs seamlessly in the background to monitor your screen time activity, from Windows to browser tabs! 🖥️
+This application runs seamlessly in the background to monitor your screen time activity, from application windows to browser tabs! 🖥️
 
 ReConnect comes with an auto-startup feature to automate screen-time monitoring. Users can easily opt-out of auto-startup through Task Manager if desired.
 
@@ -30,11 +31,6 @@ Stay productive and mindful with ReConnect! 🚀
 
 To start using ReConnect, follow these simple steps:
 
-### Prerequisites
-
-Make sure your system meets the following requirements:
-- Operating System: Windows 10 or higher
-
 ### Installation
 
 1. **Download the installer** from the [ReConnect website](https://example.com).
@@ -56,7 +52,6 @@ ReConnect is designed to be user-friendly and intuitive. Here's how to make the 
 ### Real-Time Screen Time Checking
 
 - **View your screen time**: Open ReConnect to see your current session time.
-- **Set alerts**: Customize alerts to remind you to take breaks.
 
 ### Screen Time History
 
@@ -99,7 +94,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 For questions or feedback, please reach out:
 
 - Email: [support@example.com](mailto:support@example.com)
-- Twitter: [@ReConnectApp](https://twitter.com/ReConnectApp)
+- GitHub Discussions: <Here>
 
 ---
 
@@ -116,4 +111,4 @@ For questions or feedback, please reach out:
 
 ---
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="center">(<a href="#project-title">back to top</a>)</p>
