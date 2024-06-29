@@ -111,4 +111,4 @@ For questions or feedback, please reach out:
 
 ---
 
-<p align="center">(<a href="#project-title">back to top</a>)</p>
+<p align="center">(<a href="[#project-title](https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/tree/main?tab=readme-ov-file#-screen-timer-productivity-app)">back to top</a>)</p>
