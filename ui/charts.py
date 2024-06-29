@@ -2,6 +2,8 @@ import PySide6.QtCharts as QtCharts
 import PySide6.QtGui
 import PySide6.QtWidgets
 
+# todo: show "No Data" when there is no data to show
+
 
 # todo: make the pie chart to show the weekly app usage, not daily
 # todo: make it much more visually appealing

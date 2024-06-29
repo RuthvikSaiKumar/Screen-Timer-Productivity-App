@@ -1,7 +1,5 @@
-import dataclasses
 import json
 
-import PySide6.QtCore
 from PySide6.QtGui import QIcon, Qt
 from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QPushButton, QMessageBox
 
@@ -9,11 +7,15 @@ from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QPushButton, QMessag
 def float_to_time(time: float):
     hours = int(time)
     minutes = int((time - hours) * 60)
+    seconds = int((time - hours - minutes / 60) * 3600)
 
-    if minutes == 0:
+    # todo: better way to do this
+    if hours != 0 and minutes == 0:
         return f"{hours} hr"
-    elif hours == 0:
+    if hours == 0 and minutes != 0:
         return f"{minutes} min"
+    if hours == 0 and minutes == 0:
+        return f"{seconds} sec"
 
     return f"{hours} hr {minutes} min"
 
@@ -24,6 +26,9 @@ def time_to_float(time: str):
     hours = int(time[0])
     minutes = int(time[1])
     seconds = int(time[2])
+
+    if hours < 0 or minutes < 0 or seconds < 0:
+        raise ValueError("Time cannot be negative")
 
     return hours + minutes / 60 + seconds / 3600
 
@@ -76,14 +81,15 @@ class AppItem:
         self.app.setMinimumHeight(50)
         self.app.setMaximumHeight(50)
 
-        # todo: make this dynamic to the width of the widget
-        self.app_name = QLabel(appdata.name if len(appdata.name) <= 15 else f"{appdata.name[:15]}...")
+        max_length = 20
+        self.app_name = QLabel(appdata.name if len(appdata.name) <= max_length else f"{appdata.name[:max_length]}...")
         self.app_name.setAlignment(Qt.AlignmentFlag.AlignVCenter)
         self.app_name.setStyleSheet("""
             font-family: Century Gothic;
             font-size: 16px;
             margin-left: 5px;
         """)
+        self.app_name.setToolTip(appdata.name)
 
         self.app_time = QLabel(float_to_time(appdata.time))
         self.app_time.setAlignment(Qt.AlignmentFlag.AlignVCenter)

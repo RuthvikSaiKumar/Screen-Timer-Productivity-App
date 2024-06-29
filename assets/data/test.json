@@ -42,5 +42,57 @@
         "tabs": {}
       }
     }
+  },
+  {
+    "2024-06-27": {
+      "Visual Studio Code": {
+        "app_type": "Application",
+        "time_spent": "02:07:53",
+        "tabs": {}
+      },
+      "Opera": {
+        "app_type": "Browser",
+        "time_spent": "02:45:00",
+        "tabs": {
+          "YouTube": "01:45:00",
+          "Google Search": "01:00:00"
+        }
+      },
+      "Task Switching": {
+        "app_type": "Application",
+        "time_spent": "00:00:51",
+        "tabs": {}
+      },
+      "Task Switching1": {
+        "app_type": "Application",
+        "time_spent": "00:00:51",
+        "tabs": {}
+      },
+      "Task Switching2": {
+        "app_type": "Application",
+        "time_spent": "00:00:51",
+        "tabs": {}
+      }
+    }
+  },
+  {
+    "2024-06-29": {
+      "Screen-Timer-Productivity-App \u2013 screen_time_app.py": {
+        "app_type": "Application",
+        "time_spent": "00:00:55",
+        "tabs": {}
+      },
+      "Google Chrome": {
+        "app_type": "Browser",
+        "time_spent": "00:00:17",
+        "tabs": {
+          "(1) WhatsApp": "00:00:01",
+          "\u2022 Discord | #\ud83d\udcac-general | The Cross-Road": "00:00:07",
+          "\u2022 Discord | #\ud83d\udc4bwelcome | The Cross-Road": "00:00:03",
+          "\u2022 Discord | #\ud83d\udc7d-area-51 | The Cross-Road": "00:00:02",
+          "playlist by Ruthvik | Spotify": "00:00:04"
+        }
+      }
+    }
   }
 ]
