@@ -1,3 +1,16 @@
+<div align="center">
+    <img src="assets/ReConnect Logo.png" alt="Logo" width="80" height="80">
+    <h1>ReConnect</h1>
+</div>
+
+
+[![Contributors][contributors-shield]][contributors-url]
+[![Forks][forks-shield]][forks-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url]
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
 
 # 📊 Screen-Timer-Productivity-App
 
@@ -111,4 +124,18 @@ For questions or feedback, please reach out:
 
 ---
 
-<p align="center">(<a href="https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/tree/main?tab=readme-ov-file#-screen-timer-productivity-app">back to top</a>)</p>
+<p align="center">(<a href="https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App-App/tree/main?tab=readme-ov-file#-screen-timer-productivity-app">back to top</a>)</p>
+
+
+[contributors-shield]: https://img.shields.io/github/contributors/RuthvikSaiKumar/Screen-Timer-Productivity-App.svg?style=for-the-badge
+[contributors-url]: https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/RuthvikSaiKumar/Screen-Timer-Productivity-App.svg?style=for-the-badge
+[forks-url]: https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/network/members
+[stars-shield]: https://img.shields.io/github/stars/RuthvikSaiKumar/Screen-Timer-Productivity-App.svg?style=for-the-badge
+[stars-url]: https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/stargazers
+[issues-shield]: https://img.shields.io/github/issues/RuthvikSaiKumar/Screen-Timer-Productivity-App.svg?style=for-the-badge
+[issues-url]: https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/issues
+[license-shield]: https://img.shields.io/github/license/RuthvikSaiKumar/Screen-Timer-Productivity-App.svg?style=for-the-badge
+[license-url]: https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/blob/master/LICENSE.txt
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/ruthvik-sai-300052291/
