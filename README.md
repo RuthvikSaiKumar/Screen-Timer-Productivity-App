@@ -4,13 +4,26 @@
 </div>
 
 
+<!-- Shields -->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![MIT License][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
 
+---
+
+## Creators
+
+### Ruthvik Sai Kumar
+[![LinkedIn][linkedin-shield]][linkedin-url-ruthvik]
+
+### Monish N Pillay
+[![LinkedIn][linkedin-shield]][linkedin-url-monish]
+
+---
+
+<!-- Shield URLs -->
 
 # 📊 Screen-Timer-Productivity-App
 
@@ -138,4 +151,5 @@ For questions or feedback, please reach out:
 [license-shield]: https://img.shields.io/github/license/RuthvikSaiKumar/Screen-Timer-Productivity-App.svg?style=for-the-badge
 [license-url]: https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/in/ruthvik-sai-300052291/
+[linkedin-url-ruthvik]: https://www.linkedin.com/in/ruthvik-sai-300052291/
+[linkedin-url-monish]: https://www.linkedin.com/in/monishnpillay/
