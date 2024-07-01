@@ -1,3 +1,4 @@
+<a name="top"></a>
 <div align="center">
     <img src="assets/ReConnect Logo.png" alt="Logo" width="80" height="80">
     <h1>ReConnect</h1>
@@ -69,6 +70,12 @@ To start using ReConnect, follow these simple steps:
 2. Navigate to `Programs > Programs and Features`.
 3. Select ReConnect and click `Uninstall`.
 
+   (or)
+
+1. Open your ReConnect application window
+2. Go to settings
+3. Click on `Uninstall`
+
 ---
 
 # Usage
@@ -119,26 +126,26 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 For questions or feedback, please reach out:
 
-- Email: [support@example.com](mailto:support@example.com)
-- GitHub Discussions: <Here>
+- Email: [support@example.com](mailto:reconnectdigiwellbeing@gmail.com)
+- GitHub Discussions: [GitHub discussions](https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/discussions)
 
 ---
 
-# Acknowledgments
+# Accreditation
 
 - [Choose an Open Source License](https://choosealicense.com)
 - [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-- [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-- [Malven's Grid Cheatsheet](https://grid.malven.co/)
 - [Img Shields](https://shields.io)
 - [GitHub Pages](https://pages.github.com)
-- [Font Awesome](https://fontawesome.com)
-- [React Icons](https://react-icons.github.io/react-icons/search)
+- [Python Docs](https://pypi.org)
+- [Flat Icons](https://www.flaticon.com)
+- [Canva](https://www.canva.com)
 
 ---
 
-<p align="center">(<a href="https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App-App/tree/main?tab=readme-ov-file#-screen-timer-productivity-app">back to top</a>)</p>
-
+<div align="center">
+    <a align="center" href="#top">[Back to Top]</a>
+</div>
 
 [contributors-shield]: https://img.shields.io/github/contributors/RuthvikSaiKumar/Screen-Timer-Productivity-App.svg?style=for-the-badge
 [contributors-url]: https://github.com/RuthvikSaiKumar/Screen-Timer-Productivity-App/graphs/contributors
