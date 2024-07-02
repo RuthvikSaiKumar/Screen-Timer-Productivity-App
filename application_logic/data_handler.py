@@ -2,6 +2,7 @@ import pickle
 from cryptography.fernet import Fernet
 import logging
 
+
 class DataHandler:
     def __init__(self, encryption_key):
         self.key = encryption_key

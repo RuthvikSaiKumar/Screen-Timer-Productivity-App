@@ -5,6 +5,7 @@ import json
 import os
 from datetime import datetime, timedelta
 
+
 # Set up tracking of active window
 class WindowTracker:
     def __init__(self, data_handler):
@@ -46,15 +47,12 @@ class WindowTracker:
         return hours * 3600 + minutes * 60 + seconds
 
     # Uses the getActiveWindow() function from pygetwindow to get the active window
-    def get_active_window(self):
-        window = gw.getActiveWindow()
-        if window:
-            return window.title
-        return None
+    @staticmethod
+    def get_active_window():
+        return window.title if (window := gw.getActiveWindow()) else None
 
     # Update the time spent on the current window
     def update_time_spent(self):
-        
         script_dir = os.path.dirname(__file__)
         assets_dir = os.path.join(script_dir, '../assets')
         data_dir = os.path.join(assets_dir, 'data')
@@ -63,10 +61,18 @@ class WindowTracker:
         try:
             with open(output_file, 'r') as f:
                 old_data = json.load(f)
+
+            if isinstance(old_data, dict):
                 self.data.update(old_data)
-        except FileNotFoundError:   
-            pass
-           
+            else:
+                logging.warning(f"Invalid data format in {output_file}. Expected dictionary, got {type(old_data)}")
+
+        except FileNotFoundError:
+            logging.warning(f"File {output_file} not found.")
+
+        except json.JSONDecodeError as e:
+            logging.error(f"Error decoding JSON from {output_file}: {e}")
+
         current_time = time.time()
         if self.current_window:
             duration = current_time - self.start_time
@@ -90,18 +96,21 @@ class WindowTracker:
                             "tabs": {}
                         }
 
-                    total_seconds_browser = self._hhmmss_to_seconds(self.data[date_str][browser_name]["time_spent"]) + duration
+                    total_seconds_browser = self._hhmmss_to_seconds(
+                        self.data[date_str][browser_name]["time_spent"]) + duration
                     self.data[date_str][browser_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_browser)
 
                     if tab_name not in self.data[date_str][browser_name]["tabs"]:
                         self.data[date_str][browser_name]["tabs"][tab_name] = "00:00:00"
 
-                    tab_seconds = self._hhmmss_to_seconds(self.data[date_str][browser_name]["tabs"][tab_name]) + duration
+                    tab_seconds = self._hhmmss_to_seconds(
+                        self.data[date_str][browser_name]["tabs"][tab_name]) + duration
                     self.data[date_str][browser_name]["tabs"][tab_name] = self.seconds_to_hhmmss(tab_seconds)
-                    
+
                     with open(output_file, 'w') as f:
                         json.dump(self.data, f, indent=4)
-                    logging.info(f"Updated time spent on {browser_name} - Tab: {tab_name}: {self.data[date_str][browser_name]['tabs'][tab_name]}")
+                    logging.info(
+                        f"Updated time spent on {browser_name} - Tab: {tab_name}: {self.data[date_str][browser_name]['tabs'][tab_name]}")
                 else:
                     logging.warning(f"Browser name not recognized for window title: {window_title}")
 
@@ -117,7 +126,7 @@ class WindowTracker:
 
                 total_seconds_app = self._hhmmss_to_seconds(self.data[date_str][window_name]["time_spent"]) + duration
                 self.data[date_str][window_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_app)
-                
+
                 with open(output_file, 'w') as f:
                     json.dump(self.data, f, indent=4)
                 logging.info(f"Updated time spent on {window_name}: {self.data[date_str][window_name]['time_spent']}")

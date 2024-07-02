@@ -1,18 +1,13 @@
 {
-    "2024-07-01": {
-        "Visual Studio Code": {
+    "2024-07-02": {
+        "Administrator: Windows PowerShell": {
             "app_type": "Application",
-            "time_spent": "00:00:17",
+            "time_spent": "00:00:25",
             "tabs": {}
         },
-        "Task Switching": {
+        "Screen-Timer-Productivity-App \u2013 window_tracker.py": {
             "app_type": "Application",
-            "time_spent": "00:00:04",
-            "tabs": {}
-        },
-        "WhatsApp": {
-            "app_type": "Application",
-            "time_spent": "00:00:07",
+            "time_spent": "00:00:01",
             "tabs": {}
         }
     }

@@ -94,5 +94,22 @@
         }
       }
     }
+  },
+  {
+    "2024-07-02": {
+      "Screen-Timer-Productivity-App \u2013 screen_time_app.py": {
+        "app_type": "Application",
+        "time_spent": "00:00:21",
+        "tabs": {}
+      },
+      "Google Chrome": {
+        "app_type": "Browser",
+        "time_spent": "00:17:48",
+        "tabs": {
+          "YouTube": "00:06:34",
+          "WhatsApp": "00:11:14"
+        }
+      }
+    }
   }
 ]
