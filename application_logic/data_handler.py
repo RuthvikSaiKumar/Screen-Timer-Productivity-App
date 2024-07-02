@@ -1,24 +1,28 @@
 import pickle
-from cryptography.fernet import Fernet
 import logging
-
+from cryptography.fernet import Fernet
 
 class DataHandler:
-    def __init__(self, encryption_key):
-        self.key = encryption_key
-        self.cipher = Fernet(self.key)
+    def __init__(self, key):
+        self.cipher = Fernet(key)
+        
+    def save_data(self, data, filename='data.pkl'):
+        try:
+            encrypted_data = self.cipher.encrypt(pickle.dumps(data))
+            with open(filename, 'wb') as file:
+                file.write(encrypted_data)
+            logging.info(f"Data successfully saved to {filename}.")
+        except Exception as e:
+            logging.error(f"Error saving data: {e}")
+    
+    def load_data(self, filename='data.pkl'):
+        try:
+            with open(filename, 'rb') as file:
+                encrypted_data = file.read()
+            data = pickle.loads(self.cipher.decrypt(encrypted_data))
+            logging.info(f"Data successfully loaded from {filename}.")
+            return data
+        except Exception as e:
+            logging.error(f"Error loading data: {e}")
+            return []
 
-    def save_data(self, data, filename):
-        serialized_data = pickle.dumps(data)
-        encrypted_data = self.cipher.encrypt(serialized_data)
-        with open(filename, 'wb') as file:
-            file.write(encrypted_data)
-        logging.info(f"Data saved to {filename}")
-
-    def load_data(self, filename):
-        with open(filename, 'rb') as file:
-            encrypted_data = file.read()
-        serialized_data = self.cipher.decrypt(encrypted_data)
-        data = pickle.loads(serialized_data)
-        logging.info(f"Data loaded from {filename}")
-        return data

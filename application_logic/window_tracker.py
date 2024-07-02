@@ -5,17 +5,16 @@ import json
 import os
 from datetime import datetime, timedelta
 
-
 # Set up tracking of active window
 class WindowTracker:
     def __init__(self, data_handler):
         self.current_window = None
         self.start_time = None
         try:
-            self.data = data_handler.load_data('data.pkl') or {}
+            self.data = data_handler.load_data('data.pkl') or []
         except Exception as e:
             logging.error(f"Error loading data from data.pkl: {e}")
-            self.data = {}
+            self.data = []
         self.data_handler = data_handler
         self.browsers = ["Google Chrome", "Mozilla Firefox", "Microsoft Edge", "Opera"]
 
@@ -58,27 +57,16 @@ class WindowTracker:
         data_dir = os.path.join(assets_dir, 'data')
         output_file = os.path.join(data_dir, 'output.json')
 
-        try:
-            with open(output_file, 'r') as f:
-                old_data = json.load(f)
-
-            if isinstance(old_data, dict):
-                self.data.update(old_data)
-            else:
-                logging.warning(f"Invalid data format in {output_file}. Expected dictionary, got {type(old_data)}")
-
-        except FileNotFoundError:
-            logging.warning(f"File {output_file} not found.")
-
-        except json.JSONDecodeError as e:
-            logging.error(f"Error decoding JSON from {output_file}: {e}")
-
         current_time = time.time()
         if self.current_window:
             duration = current_time - self.start_time
             date_str = time.strftime("%Y-%m-%d")
-            if date_str not in self.data:
-                self.data[date_str] = {}
+
+            # Find the entry for the current date or create a new one
+            date_entry = next((entry for entry in self.data if date_str in entry), None)
+            if not date_entry:
+                date_entry = {date_str: {}}
+                self.data.append(date_entry)
 
             window_title = self.current_window
             app_type = "Browser" if any(browser in window_title for browser in self.browsers) else "Application"
@@ -89,47 +77,47 @@ class WindowTracker:
                 tab_name = self.simplify_name(window_title)
 
                 if browser_name:
-                    if browser_name not in self.data[date_str]:
-                        self.data[date_str][browser_name] = {
+                    if browser_name not in date_entry[date_str]:
+                        date_entry[date_str][browser_name] = {
                             "app_type": app_type,
                             "time_spent": "00:00:00",
                             "tabs": {}
                         }
 
                     total_seconds_browser = self._hhmmss_to_seconds(
-                        self.data[date_str][browser_name]["time_spent"]) + duration
-                    self.data[date_str][browser_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_browser)
+                        date_entry[date_str][browser_name]["time_spent"]) + duration
+                    date_entry[date_str][browser_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_browser)
 
-                    if tab_name not in self.data[date_str][browser_name]["tabs"]:
-                        self.data[date_str][browser_name]["tabs"][tab_name] = "00:00:00"
+                    if tab_name not in date_entry[date_str][browser_name]["tabs"]:
+                        date_entry[date_str][browser_name]["tabs"][tab_name] = "00:00:00"
 
                     tab_seconds = self._hhmmss_to_seconds(
-                        self.data[date_str][browser_name]["tabs"][tab_name]) + duration
-                    self.data[date_str][browser_name]["tabs"][tab_name] = self.seconds_to_hhmmss(tab_seconds)
+                        date_entry[date_str][browser_name]["tabs"][tab_name]) + duration
+                    date_entry[date_str][browser_name]["tabs"][tab_name] = self.seconds_to_hhmmss(tab_seconds)
 
                     with open(output_file, 'w') as f:
                         json.dump(self.data, f, indent=4)
                     logging.info(
-                        f"Updated time spent on {browser_name} - Tab: {tab_name}: {self.data[date_str][browser_name]['tabs'][tab_name]}")
+                        f"Updated time spent on {browser_name} - Tab: {tab_name}: {date_entry[date_str][browser_name]['tabs'][tab_name]}")
                 else:
                     logging.warning(f"Browser name not recognized for window title: {window_title}")
 
             else:  # Application
                 window_name = self.simplify_name(window_title)
 
-                if window_name not in self.data[date_str]:
-                    self.data[date_str][window_name] = {
+                if window_name not in date_entry[date_str]:
+                    date_entry[date_str][window_name] = {
                         "app_type": app_type,
                         "time_spent": "00:00:00",
                         "tabs": {}
                     }
 
-                total_seconds_app = self._hhmmss_to_seconds(self.data[date_str][window_name]["time_spent"]) + duration
-                self.data[date_str][window_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_app)
+                total_seconds_app = self._hhmmss_to_seconds(date_entry[date_str][window_name]["time_spent"]) + duration
+                date_entry[date_str][window_name]["time_spent"] = self.seconds_to_hhmmss(total_seconds_app)
 
                 with open(output_file, 'w') as f:
                     json.dump(self.data, f, indent=4)
-                logging.info(f"Updated time spent on {window_name}: {self.data[date_str][window_name]['time_spent']}")
+                logging.info(f"Updated time spent on {window_name}: {date_entry[date_str][window_name]['time_spent']}")
 
         else:
             logging.warning("Current window is None, cannot update time spent.")
@@ -137,9 +125,7 @@ class WindowTracker:
     def clean_old_data(self, days_to_keep=30):
         current_date = datetime.now()
         cutoff_date = current_date - timedelta(days=days_to_keep)
-        dates_to_delete = [date for date in self.data if datetime.strptime(date, "%Y-%m-%d") < cutoff_date]
-        for date in dates_to_delete:
-            del self.data[date]
+        self.data = [entry for entry in self.data if datetime.strptime(list(entry.keys())[0], "%Y-%m-%d") >= cutoff_date]
         logging.info(f"Deleted data older than {cutoff_date.strftime('%Y-%m-%d')}")
 
     def to_json(self):

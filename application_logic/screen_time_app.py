@@ -1,6 +1,7 @@
-from .window_tracker import WindowTracker
-from .data_handler import DataHandler
+from window_tracker import WindowTracker
+from data_handler import DataHandler
 from cryptography.fernet import Fernet
+# from window_tracker import WindowTracker
 
 
 class ScreenTimeApp:

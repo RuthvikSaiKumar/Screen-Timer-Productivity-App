@@ -1,14 +1,24 @@
-{
-    "2024-07-02": {
-        "Administrator: Windows PowerShell": {
-            "app_type": "Application",
-            "time_spent": "00:00:25",
-            "tabs": {}
-        },
-        "Screen-Timer-Productivity-App \u2013 window_tracker.py": {
-            "app_type": "Application",
-            "time_spent": "00:00:01",
-            "tabs": {}
+[
+    {
+        "2024-07-02": {
+            "Visual Studio Code": {
+                "app_type": "Application",
+                "time_spent": "00:00:04",
+                "tabs": {}
+            },
+            "Task Switching": {
+                "app_type": "Application",
+                "time_spent": "00:00:02",
+                "tabs": {}
+            },
+            "Opera": {
+                "app_type": "Browser",
+                "time_spent": "00:00:06",
+                "tabs": {
+                    "Manage PC Screen Time": "00:00:03",
+                    "Hacked Text Effect": "00:00:03"
+                }
+            }
         }
     }
-}
+]
