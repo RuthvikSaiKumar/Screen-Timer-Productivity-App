@@ -25,6 +25,8 @@ class WeekData:
 
 
 class MainWindow(QMainWindow):
+    date_label: QLabel
+    update_button: QPushButton
     settings_button: QPushButton
     feedback_button: QPushButton
     github: QPushButton
@@ -158,14 +160,25 @@ class MainWindow(QMainWindow):
         self.create_github_link()
         self.create_feedback_button()
         self.create_settings_button()
+        self.create_update_button()
+        self.create_date_display()
+
+        left_layout = QHBoxLayout()
+        left_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        left_layout.addWidget(self.date_label)
+
+        right_layout = QHBoxLayout()
+        right_layout.setAlignment(Qt.AlignmentFlag.AlignRight)
+        right_layout.addWidget(self.update_button)
+        right_layout.addWidget(self.settings_button)
+        right_layout.addWidget(self.feedback_button)
+        right_layout.addWidget(self.switch_theme_button)
+        right_layout.addWidget(self.help_button)
+        right_layout.addWidget(self.github)
 
         bottom_bar = QHBoxLayout()
-        bottom_bar.setAlignment(Qt.AlignmentFlag.AlignRight)
-        bottom_bar.addWidget(self.settings_button)
-        bottom_bar.addWidget(self.feedback_button)
-        bottom_bar.addWidget(self.switch_theme_button)
-        bottom_bar.addWidget(self.help_button)
-        bottom_bar.addWidget(self.github)
+        bottom_bar.addLayout(left_layout)
+        bottom_bar.addLayout(right_layout)
 
         self.vlayout = QVBoxLayout()
         self.vlayout.addLayout(self.hlayout)
@@ -594,3 +607,50 @@ class MainWindow(QMainWindow):
             color: #021002;
         """)
         notification.exec()
+
+    def create_update_button(self):
+        self.update_button = QPushButton("Check Update")
+        self.update_button.setStyleSheet("""
+            background-color: #16DB65;
+            color: #021002;
+            border-radius: 10px;
+            font-family: Century Gothic;
+            font-size: 16px;
+            font-weight: bold;
+        """)
+        self.update_button.setMinimumSize(130, 30)
+        self.update_button.setMaximumSize(130, 30)
+
+        self.update_button.clicked.connect(self.on_update_button_clicked)
+
+    @staticmethod
+    def on_update_button_clicked():
+        # check for new releases on GitHub, and notify the user if there is a new release
+        notification = QMessageBox()
+        notification.setWindowTitle("Update")
+        notification.setText(
+            "Feature Under Development\n\n"
+            "This button will allow you to update the app."
+        )
+        notification.setStandardButtons(QMessageBox.StandardButton.Ok)
+        notification.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 15px;
+            color: #16DB65;
+        """)
+        notification.setWindowIcon(QIcon("assets/ReConnect Logo.png"))
+        notification.button(QMessageBox.StandardButton.Ok).setStyleSheet("""
+            background-color: #16DB65;
+            color: #021002;
+        """)
+        notification.exec()
+
+    def create_date_display(self):
+        # a label to display the current date in the format "dd MMM, yyyy - WWW" - eg: 01 Jan, 2022 - Sun
+        self.date_label = QLabel(QDate.currentDate().toString("dd MMM, yyyy - ddd"))
+        self.date_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.date_label.setStyleSheet("""
+            font-family: Century Gothic;
+            font-size: 16px;
+            color: #16DB65;
+        """)

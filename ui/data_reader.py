@@ -153,7 +153,7 @@ class AppItem:
 
 
 def read_data():
-    json_string = json.loads(open('assets/data/output.json').read())
+    json_string = json.loads(open('assets/data/test.json').read())
 
     total_data = {}
 
