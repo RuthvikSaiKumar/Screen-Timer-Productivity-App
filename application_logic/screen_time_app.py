@@ -1,7 +1,6 @@
 from window_tracker import WindowTracker
 from data_handler import DataHandler
 from cryptography.fernet import Fernet
-# from window_tracker import WindowTracker
 
 
 class ScreenTimeApp:
@@ -22,7 +21,9 @@ class ScreenTimeApp:
     def read_data(self, filename):
         return self.data_handler.load_data(filename)
 
-
-if __name__ == "__main__":
+def main():
     app = ScreenTimeApp()
     app.run()
+
+if __name__ == "__main__":
+    main()

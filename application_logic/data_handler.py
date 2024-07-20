@@ -16,7 +16,7 @@ class DataHandler:
             logging.error(f"Error saving data: {e}")
     
     def load_data(self, filename='data.pkl'):
-        try:
+        try:    
             with open(filename, 'rb') as file:
                 encrypted_data = file.read()
             data = pickle.loads(self.cipher.decrypt(encrypted_data))

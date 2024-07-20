@@ -1,6 +1,6 @@
 [
     {
-        "2024-07-02": {
+        "2024-07-16": {
             "Visual Studio Code": {
                 "app_type": "Application",
                 "time_spent": "00:00:04",
@@ -11,12 +11,16 @@
                 "time_spent": "00:00:02",
                 "tabs": {}
             },
+            "dist": {
+                "app_type": "Application",
+                "time_spent": "00:00:01",
+                "tabs": {}
+            },
             "Opera": {
                 "app_type": "Browser",
-                "time_spent": "00:00:06",
+                "time_spent": "00:00:01",
                 "tabs": {
-                    "Manage PC Screen Time": "00:00:03",
-                    "Hacked Text Effect": "00:00:03"
+                    "YouTube": "00:00:01"
                 }
             }
         }
